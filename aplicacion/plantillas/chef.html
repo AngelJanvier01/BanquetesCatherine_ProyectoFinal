@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titulo %}Panel chef{% endblock %}
+{% block titulo %}Panel cocina{% endblock %}
 
 {% block contenido %}
 <section class="contenedor seccion">
@@ -7,42 +7,61 @@
         <div>
             <p class="etiqueta">Cocina</p>
             <h1>Recetas y platillos</h1>
-            <p>Administracion de alimentos, costos, dificultad, ingredientes e instrucciones.</p>
+            <p>Administracion de alimentos, costos, dificultad, ingredientes y procedimientos.</p>
         </div>
         <a class="boton boton-oscuro" href="{{ url_for('platillos_publicos') }}">Catalogo publico</a>
     </div>
 
-    <div class="dos-columnas">
-        <form class="formulario" method="post" action="{{ url_for('crear_platillo') }}">
-            <h2>Nuevo platillo</h2>
+    <section class="bloque">
+        <form class="formulario formulario-receta" method="post" action="{{ url_for('crear_platillo') }}" data-receta-builder>
+            <h2>Nueva receta presupuestada</h2>
+            <p class="texto-suave ancho-total">El margen calcula el precio de venta si dejas el precio manual en cero. Los ingredientes se toman del catalogo existente.</p>
             <input name="nombre" placeholder="Nombre platillo" required>
-            <textarea name="descripcion" rows="3" placeholder="Descripcion"></textarea>
-            <input name="precio" type="number" min="0" step="0.01" placeholder="Precio venta" required>
-            <input name="costo_estimado" type="number" min="0" step="0.01" placeholder="Costo estimado" required>
-            <input name="porciones_base" type="number" min="1" placeholder="Porciones base" required>
             <input name="categoria" placeholder="Categoria" required>
-            <input name="tipo_dieta" placeholder="Tipo dieta">
+            <input name="tipo_dieta" placeholder="Tipo dieta" value="GENERAL">
             <select name="dificultad" required>
                 <option>BAJA</option>
                 <option selected>MEDIA</option>
                 <option>ALTA</option>
             </select>
-            <select name="id_ingrediente_existente">
-                <option value="">Crear ingrediente nuevo</option>
-                {% for ingrediente in ingredientes %}
-                    <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }} · {{ ingrediente.unidad_medida }}</option>
-                {% endfor %}
-            </select>
-            <input name="ingrediente" placeholder="Nuevo ingrediente">
-            <input name="unidad_medida" placeholder="Unidad medida">
-            <input name="cantidad" type="number" min="0.001" step="0.001" placeholder="Cantidad" required>
-            <input name="presentacion" placeholder="Presentacion">
-            <input name="observacion" placeholder="Observacion">
-            <textarea name="instruccion" rows="2" placeholder="Primer paso" required></textarea>
-            <input name="detalle_instruccion" placeholder="Detalle del paso">
-            <button class="boton boton-oscuro" type="submit">Guardar platillo</button>
-        </form>
+            <input name="costo_estimado" data-costo-receta type="number" min="0" step="0.01" placeholder="Costo estimado" required>
+            <input name="margen_ganancia" data-margen-receta type="number" min="0" step="0.01" value="35" placeholder="Margen de ganancia">
+            <input name="precio" data-precio-receta type="number" min="0" step="0.01" placeholder="Precio venta manual o 0">
+            <input name="porciones_base" type="number" min="1" value="4" placeholder="Porciones base" required>
+            <input name="foto_url" value="img/hero-banquetes.png" placeholder="Foto URL">
+            <textarea name="descripcion" rows="3" placeholder="Descripcion"></textarea>
 
+            <div class="constructor-receta">
+                <div>
+                    <h3>Ingredientes</h3>
+                    <div class="formulario-linea">
+                        <select data-selector-ingrediente>
+                            {% for ingrediente in ingredientes %}
+                                <option value="{{ ingrediente.id_ingrediente }}" data-nombre="{{ ingrediente.nombre_ingrediente }}" data-unidad="{{ ingrediente.unidad_medida }}">{{ ingrediente.nombre_ingrediente }} - {{ ingrediente.unidad_medida }}</option>
+                            {% endfor %}
+                        </select>
+                        <input data-cantidad-ingrediente type="number" min="0.001" step="0.001" placeholder="Cantidad">
+                        <button class="boton boton-chico" type="button" data-agregar-ingrediente>Agregar</button>
+                    </div>
+                    <div class="lista-constructor" data-lista-ingredientes></div>
+                </div>
+
+                <div>
+                    <h3>Procedimientos</h3>
+                    <div class="formulario-linea">
+                        <input data-texto-paso placeholder="Procedimiento">
+                        <input data-detalle-paso placeholder="Detalle opcional">
+                        <button class="boton boton-chico" type="button" data-agregar-paso>Agregar</button>
+                    </div>
+                    <div class="lista-constructor" data-lista-pasos></div>
+                </div>
+            </div>
+            <p class="resumen-cotizacion ancho-total" data-resumen-receta>Precio sugerido: captura costo y margen.</p>
+            <button class="boton boton-oscuro" type="submit">Guardar receta</button>
+        </form>
+    </section>
+
+    <div class="dos-columnas">
         <section>
             <h2>Ingredientes disponibles</h2>
             <div class="lista-precios lista-compacta">
@@ -54,62 +73,111 @@
                 {% endfor %}
             </div>
         </section>
+
+        <section>
+            <h2>Resumen de platillos activos</h2>
+            <div class="lista-precios lista-compacta">
+                {% for platillo in platillos %}
+                    <div>
+                        <span>{{ platillo.nombre }}<small>{{ platillo.categoria }} - {{ platillo.dificultad }}</small></span>
+                        <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
     </div>
 
     <section class="bloque">
-        <h2>Platillos activos</h2>
-        <div class="rejilla tarjetas">
+        <div class="encabezado-seccion">
+            <div>
+                <h2>Cuadricula de recetas</h2>
+                <p>Abre cada receta para revisar ingredientes, procedimientos y hacer ajustes rapidos.</p>
+            </div>
+        </div>
+        <div class="rejilla tarjetas tarjetas-recetas">
             {% for platillo in platillos %}
-                <article class="tarjeta">
-                    <span class="pildora">{{ platillo.dificultad }}</span>
-                    <h3>{{ platillo.nombre }}</h3>
-                    <p>{{ platillo.descripcion }}</p>
-                    <p>Venta ${{ "%.2f"|format(platillo.precio) }} · costo ${{ "%.2f"|format(platillo.costo_estimado) }}</p>
-                    <form class="formulario formulario-simple" method="post" action="{{ url_for('chef_agregar_ingrediente', id_platillo=platillo.id_platillo) }}">
-                        <select name="id_ingrediente" required>
-                            {% for ingrediente in ingredientes %}
-                                <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
-                            {% endfor %}
-                        </select>
-                        <input name="cantidad" type="number" min="0.001" step="0.001" placeholder="Cantidad" required>
-                        <button class="boton boton-chico" type="submit">Agregar ingrediente</button>
-                    </form>
-                    <form class="formulario formulario-simple" method="post" action="{{ url_for('chef_agregar_instruccion', id_platillo=platillo.id_platillo) }}">
-                        <textarea name="instruccion" rows="2" placeholder="Nueva instruccion" required></textarea>
-                        <input name="detalle_instruccion" placeholder="Detalle">
-                        <button class="boton boton-chico" type="submit">Agregar paso</button>
-                    </form>
+                <article class="tarjeta tarjeta-receta">
+                    <img src="{{ url_for('static', filename=platillo.foto_url or 'img/hero-banquetes.png') }}" alt="{{ platillo.nombre }}">
+                    <div class="tarjeta-receta-cuerpo">
+                        <div class="tarjeta-cabecera">
+                            <span class="pildora">{{ platillo.dificultad }}</span>
+                            <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
+                        </div>
+                        <h3>{{ platillo.nombre }}</h3>
+                        <p>{{ platillo.descripcion }}</p>
+                        <p class="texto-suave">Costo ${{ "%.2f"|format(platillo.costo_estimado) }} - {{ platillo.porciones_base }} porciones base</p>
+                        <button class="boton boton-chico" type="button" data-abrir-receta="receta-{{ platillo.id_platillo }}">Ver receta</button>
+                    </div>
                 </article>
             {% endfor %}
         </div>
     </section>
 
-    <section class="bloque">
-        <h2>Vista de recetas</h2>
-        <div class="tabla-contenedor">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Platillo</th>
-                        <th>Ingrediente</th>
-                        <th>Cantidad</th>
-                        <th>Paso</th>
-                        <th>Instruccion</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for receta in recetas %}
-                        <tr>
-                            <td>{{ receta.platillo }}<br><span>{{ receta.categoria }} · {{ receta.dificultad }}</span></td>
-                            <td>{{ receta.nombre_ingrediente }}</td>
-                            <td>{{ receta.cantidad }} {{ receta.unidad_medida }}</td>
-                            <td>{{ receta.numero_paso }}</td>
-                            <td>{{ receta.instruccion }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    {% for platillo in platillos %}
+        <div class="modal-receta" id="receta-{{ platillo.id_platillo }}" aria-hidden="true">
+            <div class="modal-fondo" data-cerrar-receta></div>
+            <section class="modal-contenido modal-receta-contenido" role="dialog" aria-modal="true">
+                <button class="modal-cerrar" type="button" data-cerrar-receta aria-label="Cerrar">x</button>
+                <div class="detalle-receta">
+                    <img src="{{ url_for('static', filename=platillo.foto_url or 'img/hero-banquetes.png') }}" alt="{{ platillo.nombre }}">
+                    <div>
+                        <span class="pildora">{{ platillo.categoria }} - {{ platillo.dificultad }}</span>
+                        <h2>{{ platillo.nombre }}</h2>
+                        <p>{{ platillo.descripcion }}</p>
+                        <dl class="datos-mini">
+                            <div><dt>Precio</dt><dd>${{ "%.2f"|format(platillo.precio) }}</dd></div>
+                            <div><dt>Costo</dt><dd>${{ "%.2f"|format(platillo.costo_estimado) }}</dd></div>
+                            <div><dt>Porciones</dt><dd>{{ platillo.porciones_base }}</dd></div>
+                            <div><dt>Dieta</dt><dd>{{ platillo.tipo_dieta }}</dd></div>
+                        </dl>
+                    </div>
+                </div>
+
+                <div class="dos-columnas">
+                    <section>
+                        <h3>Ingredientes</h3>
+                        <div class="lista-precios">
+                            {% for ingrediente in receta_ingredientes if ingrediente.id_platillo == platillo.id_platillo %}
+                                <div>
+                                    <span>{{ ingrediente.nombre_ingrediente }}</span>
+                                    <strong>{{ ingrediente.cantidad }} {{ ingrediente.unidad_medida }}</strong>
+                                </div>
+                            {% else %}
+                                <p class="texto-suave">Sin ingredientes registrados.</p>
+                            {% endfor %}
+                        </div>
+                        <form class="formulario formulario-simple bloque" method="post" action="{{ url_for('chef_agregar_ingrediente', id_platillo=platillo.id_platillo) }}">
+                            <select name="id_ingrediente" required>
+                                {% for ingrediente in ingredientes %}
+                                    <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }}</option>
+                                {% endfor %}
+                            </select>
+                            <input name="cantidad" type="number" min="0.001" step="0.001" placeholder="Cantidad" required>
+                            <button class="boton boton-chico" type="submit">Agregar ingrediente</button>
+                        </form>
+                    </section>
+
+                    <section>
+                        <h3>Procedimiento</h3>
+                        <ol class="lista-pasos">
+                            {% for paso in receta_pasos if paso.id_platillo == platillo.id_platillo %}
+                                <li>
+                                    <strong>{{ paso.instruccion }}</strong>
+                                    {% if paso.detalle_instruccion %}<span>{{ paso.detalle_instruccion }}</span>{% endif %}
+                                </li>
+                            {% else %}
+                                <li>Sin pasos registrados.</li>
+                            {% endfor %}
+                        </ol>
+                        <form class="formulario formulario-simple bloque" method="post" action="{{ url_for('chef_agregar_instruccion', id_platillo=platillo.id_platillo) }}">
+                            <textarea name="instruccion" rows="2" placeholder="Nueva instruccion" required></textarea>
+                            <input name="detalle_instruccion" placeholder="Detalle">
+                            <button class="boton boton-chico" type="submit">Agregar paso</button>
+                        </form>
+                    </section>
+                </div>
+            </section>
         </div>
-    </section>
+    {% endfor %}
 </section>
 {% endblock %}

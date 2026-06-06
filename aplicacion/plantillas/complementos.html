@@ -17,6 +17,7 @@
                 <span>
                     <strong>{{ complemento.nombre }}</strong>
                     <small>{{ complemento.descripcion }}</small>
+                    <small>{{ complemento.tipo_complemento }} - {{ complemento.tipo_cobro }}</small>
                 </span>
                 <strong>${{ "%.2f"|format(complemento.precio) }}</strong>
             </div>

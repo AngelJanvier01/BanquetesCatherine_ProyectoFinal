@@ -6,6 +6,17 @@ from functools import wraps
 from flask import flash, redirect, session, url_for
 
 
+def generar_hash_contrasena(contrasena, sal="banquetes2026", iteraciones=260000):
+    derivado = hashlib.pbkdf2_hmac(
+        "sha256",
+        contrasena.encode("utf-8"),
+        sal.encode("utf-8"),
+        iteraciones,
+    )
+    hash_base64 = base64.b64encode(derivado).decode("utf-8")
+    return f"pbkdf2_sha256${iteraciones}${sal}${hash_base64}"
+
+
 def verificar_contrasena(contrasena, hash_guardado):
     try:
         algoritmo, iteraciones, sal, hash_base64 = hash_guardado.split("$", 3)
@@ -37,4 +48,3 @@ def sesion_requerida(*roles_permitidos):
         return envoltura
 
     return decorador
-

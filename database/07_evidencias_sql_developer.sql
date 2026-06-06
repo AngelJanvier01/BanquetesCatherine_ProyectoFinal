@@ -100,6 +100,18 @@ SELECT id_proyecto, nombre_evento, total_pagado, saldo_pendiente
 FROM vw_estado_pago_proyecto
 ORDER BY id_proyecto;
 
+-- Paquetes armados con platillos y complementos existentes.
+SELECT nombre, tipo_paquete, precio_base, complementos_persona, complementos_evento, platillos, complementos
+FROM vw_paquete_resumen
+ORDER BY personalizado DESC, nombre;
+
+-- Cotizacion calculada desde funcion PL/SQL.
+SELECT
+    fn_costo_paquete_persona(1) AS costo_persona_paquete,
+    fn_complementos_evento_paquete(1) AS complementos_evento,
+    fn_total_estimado_evento(120, 2, 1) AS total_estimado_evento
+FROM dual;
+
 SELECT
     id_proyecto,
     fn_total_pagado(id_proyecto) AS total_pagado_funcion,

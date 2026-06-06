@@ -79,6 +79,78 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE FUNCTION fn_complementos_evento_paquete(p_id_paquete IN NUMBER)
+RETURN NUMBER
+IS
+    v_total NUMBER(12,2);
+BEGIN
+    SELECT NVL(SUM(c.precio * pc.cantidad), 0)
+    INTO v_total
+    FROM PAQUETE_COMPLEMENTO pc
+    INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento
+    WHERE pc.id_paquete = p_id_paquete
+      AND c.tipo_cobro = 'POR_EVENTO'
+      AND c.activo = 'S';
+
+    RETURN v_total;
+END;
+/
+
+CREATE OR REPLACE FUNCTION fn_costo_paquete_persona(p_id_paquete IN NUMBER)
+RETURN NUMBER
+IS
+    v_precio PAQUETE.precio_base%TYPE;
+    v_complementos_persona NUMBER(12,2);
+BEGIN
+    SELECT precio_base
+    INTO v_precio
+    FROM PAQUETE
+    WHERE id_paquete = p_id_paquete
+      AND activo = 'S';
+
+    SELECT NVL(SUM(c.precio * pc.cantidad), 0)
+    INTO v_complementos_persona
+    FROM PAQUETE_COMPLEMENTO pc
+    INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento
+    WHERE pc.id_paquete = p_id_paquete
+      AND c.tipo_cobro = 'POR_PERSONA'
+      AND c.activo = 'S';
+
+    RETURN v_precio + v_complementos_persona;
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
+
+CREATE OR REPLACE FUNCTION fn_total_estimado_evento(
+    p_numero_invitados IN NUMBER,
+    p_id_salon IN NUMBER,
+    p_id_paquete IN NUMBER
+)
+RETURN NUMBER
+IS
+    v_costo_persona NUMBER(12,2);
+    v_renta_salon SALON.costo_renta%TYPE;
+    v_complementos_evento NUMBER(12,2);
+BEGIN
+    SELECT costo_renta
+    INTO v_renta_salon
+    FROM SALON
+    WHERE id_salon = p_id_salon
+      AND activo = 'S'
+      AND convenio_activo = 'S';
+
+    v_costo_persona := fn_costo_paquete_persona(p_id_paquete);
+    v_complementos_evento := fn_complementos_evento_paquete(p_id_paquete);
+
+    RETURN ROUND((NVL(v_costo_persona, 0) * p_numero_invitados) + v_renta_salon + v_complementos_evento, 2);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN NULL;
+END;
+/
+
 -- Procedimientos PL/SQL con DML y control de transacciones.
 
 CREATE OR REPLACE PROCEDURE sp_insertar_notificacion(
@@ -182,6 +254,7 @@ IS
     v_personalizado PAQUETE.personalizado%TYPE;
     v_cliente_paquete PAQUETE.id_cliente%TYPE;
     v_sugerencias VARCHAR2(1000);
+    v_total_estimado PROYECTO_EVENTO.total_estimado%TYPE;
 BEGIN
     SAVEPOINT antes_de_crear_proyecto;
 
@@ -232,6 +305,12 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20006, 'Debe registrarse un anticipo mayor a cero.');
     END IF;
 
+    IF p_total_estimado IS NULL OR p_total_estimado <= 0 THEN
+        v_total_estimado := fn_total_estimado_evento(v_invitados, p_id_salon, p_id_paquete);
+    ELSE
+        v_total_estimado := p_total_estimado;
+    END IF;
+
     INSERT INTO PROYECTO_EVENTO (
         id_proyecto,
         id_solicitud,
@@ -255,8 +334,8 @@ BEGIN
         INITCAP(TRIM(p_nombre_evento)),
         v_fecha_evento,
         v_invitados,
-        p_total_estimado,
-        CASE WHEN p_anticipo >= p_total_estimado THEN 'S' ELSE 'N' END,
+        v_total_estimado,
+        CASE WHEN p_anticipo >= v_total_estimado THEN 'S' ELSE 'N' END,
         STANDARD_HASH(TO_CHAR(SYSTIMESTAMP, 'YYYYMMDDHH24MISSFF') || p_id_cliente || p_id_solicitud, 'SHA256')
     )
     RETURNING id_proyecto INTO p_id_proyecto;
@@ -309,11 +388,12 @@ CREATE OR REPLACE PROCEDURE sp_registrar_pago(
 IS
     v_total PROYECTO_EVENTO.total_estimado%TYPE;
     v_pagado NUMBER(12,2);
+    v_id_cliente PROYECTO_EVENTO.id_cliente%TYPE;
 BEGIN
     SAVEPOINT antes_de_pago;
 
-    SELECT total_estimado
-    INTO v_total
+    SELECT total_estimado, id_cliente
+    INTO v_total, v_id_cliente
     FROM PROYECTO_EVENTO
     WHERE id_proyecto = p_id_proyecto
     FOR UPDATE;
@@ -342,7 +422,7 @@ BEGIN
             fecha_actualizacion = SYSDATE
         WHERE id_proyecto = p_id_proyecto;
 
-        sp_insertar_notificacion('CLIENTE', NULL, p_id_proyecto, NULL, 'WEB',
+        sp_insertar_notificacion('CLIENTE', v_id_cliente, p_id_proyecto, NULL, 'WEB',
             'Evento finiquitado', 'Los pagos cubren el total estimado del evento.');
     END IF;
 
@@ -364,13 +444,15 @@ IS
     v_id_cliente CLIENTE.id_cliente%TYPE;
     v_fecha_evento PROYECTO_EVENTO.fecha_evento%TYPE;
     v_id_salon PROYECTO_EVENTO.id_salon%TYPE;
+    v_id_paquete PROYECTO_EVENTO.id_paquete%TYPE;
     v_capacidad SALON.capacidad_maxima%TYPE;
     v_invitados_anteriores PROYECTO_EVENTO.numero_invitados%TYPE;
+    v_total_estimado PROYECTO_EVENTO.total_estimado%TYPE;
 BEGIN
     SAVEPOINT antes_de_cambio_invitados;
 
-    SELECT c.id_cliente, pe.fecha_evento, pe.id_salon, pe.numero_invitados
-    INTO v_id_cliente, v_fecha_evento, v_id_salon, v_invitados_anteriores
+    SELECT c.id_cliente, pe.fecha_evento, pe.id_salon, pe.id_paquete, pe.numero_invitados
+    INTO v_id_cliente, v_fecha_evento, v_id_salon, v_id_paquete, v_invitados_anteriores
     FROM PROYECTO_EVENTO pe
     INNER JOIN CLIENTE c ON c.id_cliente = pe.id_cliente
     WHERE pe.id_proyecto = p_id_proyecto
@@ -391,13 +473,17 @@ BEGIN
         RAISE_APPLICATION_ERROR(-20011, 'El salon no tiene capacidad. Alternativas: ' || fn_salones_sugeridos(p_numero_invitados));
     END IF;
 
+    v_total_estimado := fn_total_estimado_evento(p_numero_invitados, v_id_salon, v_id_paquete);
+
     UPDATE PROYECTO_EVENTO
     SET numero_invitados = p_numero_invitados,
+        total_estimado = v_total_estimado,
+        finiquitado = CASE WHEN fn_total_pagado(p_id_proyecto) >= v_total_estimado THEN 'S' ELSE 'N' END,
         fecha_actualizacion = SYSDATE
     WHERE id_proyecto = p_id_proyecto;
 
     sp_insertar_notificacion('GERENTE', NULL, p_id_proyecto, NULL, 'WEB',
-        'Cambio de invitados', 'El cliente cambio invitados de ' || v_invitados_anteriores || ' a ' || p_numero_invitados || '.');
+        'Cambio de invitados', 'El cliente cambio invitados de ' || v_invitados_anteriores || ' a ' || p_numero_invitados || '. Nuevo total: $' || TO_CHAR(v_total_estimado, '9999990.00') || '.');
     sp_insertar_notificacion('INSTALACION', NULL, p_id_proyecto, v_id_salon, 'CORREO',
         'Cambio relevante para instalacion', 'Actualizar montaje para ' || p_numero_invitados || ' invitados.');
 
@@ -636,8 +722,8 @@ BEGIN
     )
     RETURNING id_invitado INTO p_id_invitado;
 
-    sp_insertar_notificacion('CLIENTE', v_id_cliente, p_id_proyecto, NULL, 'CORREO',
-        'Invitacion enviada', 'Se simulo el envio de invitacion a ' || INITCAP(TRIM(p_nombre)) || '.');
+    sp_insertar_notificacion('CLIENTE', v_id_cliente, p_id_proyecto, NULL, 'WEB',
+        'Invitado agregado', 'Se agrego a la lista de invitados: ' || INITCAP(TRIM(p_nombre)) || '.');
 
     COMMIT;
 EXCEPTION

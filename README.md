@@ -59,20 +59,22 @@ Edita `.env` si tu Oracle usa otro host, puerto o servicio:
 ```txt
 ORACLE_HOST=127.0.0.1
 ORACLE_PORT=1521
-ORACLE_SERVICE=XEPDB1
+ORACLE_SERVICE=AUTO
 ORACLE_USER=BANQUETES_CATHERINE
 ORACLE_PASSWORD=Catherine2026
-ORACLE_USAR_SYSDBA_LOCAL=N
-ORACLE_CLIENT_LIB_DIR=C:\app\ANGEL\product\21c\dbhomeXE\bin
+ORACLE_USAR_SYSDBA_LOCAL=S
+ORACLE_CLIENT_LIB_DIR=AUTO
 ```
 
-Si Oracle XE en Windows marca `ORA-12518` o `TNS-00534` al conectarse por listener, se puede usar el modo local de emergencia:
+Con `ORACLE_SERVICE=AUTO`, el proyecto detecta automaticamente el PDB local abierto (`XEPDB1`, `FREEPDB1` u otro PDB disponible) cuando usa `ORACLE_USAR_SYSDBA_LOCAL=S`.
+
+Si prefieres conectar por listener normal, cambia `ORACLE_USAR_SYSDBA_LOCAL=N` y escribe el servicio real:
 
 ```txt
-ORACLE_USAR_SYSDBA_LOCAL=S
+ORACLE_SERVICE=XEPDB1
 ```
 
-Y cargar la base sin listener con:
+Para cargar la base sin listener:
 
 ```bat
 sqlplus / as sysdba @database/98_instalar_local_sysdba.sql

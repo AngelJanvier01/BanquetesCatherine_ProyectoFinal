@@ -1,4 +1,6 @@
 import os
+import re
+import shutil
 from contextlib import contextmanager
 
 import oracledb
@@ -23,12 +25,72 @@ def iniciar_cliente_oracle():
     global cliente_oracle_iniciado
     if cliente_oracle_iniciado:
         return
-    carpeta_cliente = os.getenv("ORACLE_CLIENT_LIB_DIR", r"C:\app\ANGEL\product\21c\dbhomeXE\bin")
+    carpeta_cliente = os.getenv("ORACLE_CLIENT_LIB_DIR", "AUTO").strip()
+    if carpeta_cliente.upper() in ("", "AUTO"):
+        ruta_sqlplus = shutil.which("sqlplus")
+        carpeta_cliente = os.path.dirname(ruta_sqlplus) if ruta_sqlplus else ""
     try:
-        oracledb.init_oracle_client(lib_dir=carpeta_cliente)
+        if carpeta_cliente and os.path.isdir(carpeta_cliente):
+            oracledb.init_oracle_client(lib_dir=carpeta_cliente)
+        else:
+            oracledb.init_oracle_client()
     except oracledb.ProgrammingError:
         pass
     cliente_oracle_iniciado = True
+
+
+def nombre_oracle_seguro(nombre):
+    return bool(re.match(r"^[A-Za-z][A-Za-z0-9_$#]*$", nombre or ""))
+
+
+def seleccionar_pdb_local(cursor):
+    servicio = os.getenv("ORACLE_SERVICE", "AUTO").strip()
+    if servicio and servicio.upper() != "AUTO":
+        if not nombre_oracle_seguro(servicio):
+            raise ValueError("ORACLE_SERVICE contiene un nombre no valido.")
+        try:
+            cursor.execute(f"ALTER SESSION SET CONTAINER = {servicio}")
+            return servicio
+        except oracledb.DatabaseError:
+            pass
+
+    cursor.execute(
+        """
+        BEGIN
+            BEGIN
+                EXECUTE IMMEDIATE 'ALTER PLUGGABLE DATABASE ALL OPEN';
+            EXCEPTION
+                WHEN OTHERS THEN NULL;
+            END;
+        END;
+        """
+    )
+    cursor.execute(
+        """
+        SELECT name
+        FROM (
+            SELECT name
+            FROM v$pdbs
+            WHERE open_mode = 'READ WRITE'
+            ORDER BY
+                CASE
+                    WHEN name = 'XEPDB1' THEN 1
+                    WHEN name = 'FREEPDB1' THEN 2
+                    ELSE 3
+                END,
+                name
+        )
+        WHERE ROWNUM = 1
+        """
+    )
+    fila = cursor.fetchone()
+    if not fila:
+        raise RuntimeError("No se encontro un PDB abierto para Oracle local.")
+    pdb = fila[0]
+    if not nombre_oracle_seguro(pdb):
+        raise ValueError("El PDB detectado no tiene un nombre valido.")
+    cursor.execute(f"ALTER SESSION SET CONTAINER = {pdb}")
+    return pdb
 
 
 def obtener_dsn():
@@ -48,7 +110,7 @@ def abrir_conexion():
         iniciar_cliente_oracle()
         conexion = oracledb.connect(mode=oracledb.AUTH_MODE_SYSDBA)
         with conexion.cursor() as cursor:
-            cursor.execute(f"ALTER SESSION SET CONTAINER = {os.getenv('ORACLE_SERVICE', 'XEPDB1')}")
+            seleccionar_pdb_local(cursor)
             cursor.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {os.getenv('ORACLE_USER', 'BANQUETES_CATHERINE')}")
     else:
         conexion = oracledb.connect(

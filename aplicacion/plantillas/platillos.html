@@ -21,6 +21,7 @@
     <div class="rejilla tarjetas">
         {% for platillo in platillos %}
             <article class="tarjeta tarjeta-catalogo animar-entrada" data-tarjeta-platillo data-categoria="{{ platillo.categoria }}">
+                <img class="imagen-catalogo" src="{{ url_for('static', filename=platillo.foto_url or 'img/hero-banquetes.png') }}" alt="{{ platillo.nombre }}">
                 <div class="tarjeta-cabecera">
                     <span class="pildora">{{ platillo.categoria }}</span>
                     <strong>${{ "%.2f"|format(platillo.precio) }}</strong>

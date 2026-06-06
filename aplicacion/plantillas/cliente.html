@@ -7,19 +7,58 @@
         <div>
             <p class="etiqueta">Portal cliente</p>
             <h1>Mis eventos</h1>
-            <p>Solicitudes, proyectos activos, costos, ubicacion e invitados.</p>
+            <p>Solicitudes, proyectos activos, costos, ubicacion, invitados y organizacion del evento.</p>
         </div>
         <button class="boton boton-oscuro abrir-agenda" type="button">Nueva solicitud</button>
     </div>
+
+    <section class="bloque">
+        <h2>Proyectos activos</h2>
+        <div class="rejilla tarjetas tarjetas-eventos">
+            {% for proyecto in proyectos %}
+                <article class="tarjeta tarjeta-evento-cliente">
+                    <div class="tarjeta-cabecera">
+                        <span class="pildora">{{ proyecto.folio_proyecto }}</span>
+                        <strong>${{ "%.2f"|format(proyecto.saldo_pendiente) }} saldo</strong>
+                    </div>
+                    <h3>{{ proyecto.nombre_evento }}</h3>
+                    <p>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }} - {{ proyecto.salon }}</p>
+                    <p class="texto-suave">{{ proyecto.direccion_salon }}</p>
+                    <dl class="datos-mini">
+                        <div><dt>Paquete</dt><dd>{{ proyecto.paquete }}</dd></div>
+                        <div><dt>Invitados</dt><dd>{{ proyecto.numero_invitados }}</dd></div>
+                        <div><dt>Costo persona</dt><dd>${{ "%.2f"|format(proyecto.costo_por_persona or 0) }}</dd></div>
+                        <div><dt>Total</dt><dd>${{ "%.2f"|format(proyecto.total_estimado) }}</dd></div>
+                    </dl>
+                    <p class="texto-suave">Menu: {{ proyecto.platillos }}</p>
+                    <p class="texto-suave">Complementos: {{ proyecto.complementos }}</p>
+                    {% if proyecto.puede_cambiar_invitados == "S" %}
+                        <form class="formulario-linea bloque-cambio-invitados" method="post" action="{{ url_for('actualizar_invitados', id_proyecto=proyecto.id_proyecto) }}" data-cotizacion-proyecto data-id-salon="{{ proyecto.id_salon }}" data-id-paquete="{{ proyecto.id_paquete }}">
+                            <input name="numero_invitados" type="number" min="1" value="{{ proyecto.numero_invitados }}" required>
+                            <span class="resumen-inline" data-resumen-proyecto>Al cambiar invitados se recalcula el total.</span>
+                            <button class="boton boton-chico" type="submit">Guardar invitados</button>
+                        </form>
+                    {% else %}
+                        <span class="pildora alerta">Cambio bloqueado por fecha cercana</span>
+                    {% endif %}
+                </article>
+            {% else %}
+                <article class="tarjeta"><p>No tienes proyectos activos.</p></article>
+            {% endfor %}
+        </div>
+    </section>
 
     <section class="bloque">
         <h2>Solicitudes enviadas</h2>
         <div class="rejilla tarjetas">
             {% for solicitud in solicitudes %}
                 <article class="tarjeta">
-                    <span class="pildora">{{ solicitud.estatus }}</span>
-                    <h3>Folio {{ solicitud.id_solicitud }}</h3>
-                    <p>{{ solicitud.fecha_evento.strftime("%Y-%m-%d") if solicitud.fecha_evento else "" }} · {{ solicitud.numero_invitados }} invitados</p>
+                    <div class="tarjeta-cabecera">
+                        <span class="pildora">{{ solicitud.estatus }}</span>
+                        <strong>{{ solicitud.folio_solicitud }}</strong>
+                    </div>
+                    <h3>{{ solicitud.nombre_contacto }}</h3>
+                    <p>{{ solicitud.fecha_evento.strftime("%Y-%m-%d") if solicitud.fecha_evento else "" }} - {{ solicitud.numero_invitados }} invitados</p>
                     <p>{{ solicitud.salon_preferido }} / {{ solicitud.paquete_preferido }}</p>
                     {% if solicitud.estatus == "PENDIENTE" %}
                         <form class="formulario formulario-simple" method="post" action="{{ url_for('actualizar_solicitud_cliente', id_solicitud=solicitud.id_solicitud) }}">
@@ -48,76 +87,72 @@
         </div>
     </section>
 
-    <section class="bloque">
-        <h2>Proyectos activos</h2>
-        <div class="tabla-contenedor">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Evento</th>
-                        <th>Fecha</th>
-                        <th>Salon</th>
-                        <th>Costos</th>
-                        <th>Invitados</th>
-                        <th>Cambio</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for proyecto in proyectos %}
-                        <tr>
-                            <td>{{ proyecto.nombre_evento }}<br><span>{{ proyecto.paquete }}</span></td>
-                            <td>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }}</td>
-                            <td>{{ proyecto.salon }}<br><span>{{ proyecto.direccion_salon }}</span></td>
-                            <td>Total ${{ "%.2f"|format(proyecto.total_estimado) }}<br><span>Pagado ${{ "%.2f"|format(proyecto.total_pagado) }} · saldo ${{ "%.2f"|format(proyecto.saldo_pendiente) }}</span></td>
-                            <td>{{ proyecto.numero_invitados }}</td>
-                            <td>
-                                {% if proyecto.puede_cambiar_invitados == "S" %}
-                                    <form class="formulario-linea" method="post" action="{{ url_for('actualizar_invitados', id_proyecto=proyecto.id_proyecto) }}">
-                                        <input name="numero_invitados" type="number" min="1" value="{{ proyecto.numero_invitados }}" required>
-                                        <button class="boton boton-chico" type="submit">Guardar</button>
-                                    </form>
-                                {% else %}
-                                    <span class="pildora alerta">Bloqueado</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% else %}
-                        <tr><td colspan="6">No tienes proyectos activos.</td></tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </section>
-
     <div class="dos-columnas">
         <section>
-            <h2>Gestion de invitados</h2>
+            <h2>Lista de invitados</h2>
             {% for proyecto in proyectos %}
                 <article class="tarjeta bloque">
+                    <span class="pildora">{{ proyecto.folio_proyecto }}</span>
                     <h3>{{ proyecto.nombre_evento }}</h3>
                     <form class="formulario formulario-simple" method="post" action="{{ url_for('registrar_invitado_evento', id_proyecto=proyecto.id_proyecto) }}">
-                        <input name="nombre" placeholder="Nombre invitado" required>
-                        <input name="correo" type="email" placeholder="Correo">
-                        <input name="telefono" placeholder="Telefono">
-                        <button class="boton boton-chico" type="submit">Simular envio</button>
+                        <input name="nombre" placeholder="Nombre del invitado" required>
+                        <button class="boton boton-chico" type="submit">Agregar nombre</button>
                     </form>
                     <div class="lista-invitados">
                         {% for invitado in invitados if invitado.id_proyecto == proyecto.id_proyecto %}
-                            <form class="formulario-linea" method="post" action="{{ url_for('confirmar_invitado_evento', id_invitado=invitado.id_invitado) }}">
-                                <span>{{ invitado.nombre }} · {{ invitado.estatus_confirmacion }}</span>
-                                <select name="estatus_confirmacion">
-                                    <option {% if invitado.estatus_confirmacion == "PENDIENTE" %}selected{% endif %}>PENDIENTE</option>
-                                    <option {% if invitado.estatus_confirmacion == "CONFIRMADO" %}selected{% endif %}>CONFIRMADO</option>
-                                    <option {% if invitado.estatus_confirmacion == "RECHAZADO" %}selected{% endif %}>RECHAZADO</option>
-                                </select>
-                                <button class="boton boton-chico" type="submit">Confirmar</button>
-                            </form>
+                            <div class="fila-invitado">
+                                <span>{{ invitado.nombre }}</span>
+                                <small>{{ invitado.estatus_confirmacion }}</small>
+                            </div>
+                        {% else %}
+                            <p class="texto-suave">Aun no hay invitados capturados.</p>
                         {% endfor %}
                     </div>
                 </article>
             {% endfor %}
         </section>
 
+        <section>
+            <h2>Funciones de cortesia</h2>
+            <p class="texto-suave">Funciones de prueba para organizar el evento desde el portal cliente.</p>
+            {% set tipos_cortesia = [
+                ("AGENDA", "Cita o actividad", "Ejemplo: prueba de menu, recorrido de salon o llamada de seguimiento"),
+                ("PENDIENTE", "Pendiente del evento", "Ejemplo: confirmar manteleria, enviar croquis o revisar horario"),
+                ("MONTAJE", "Preferencia de montaje", "Ejemplo: mesa principal, pista, recepcion y acomodo"),
+                ("MUSICA", "Momentos especiales", "Ejemplo: entrada, vals, brindis o cierre"),
+                ("DIETA", "Dietas especiales", "Ejemplo: vegetariano, sin lactosa o alergias")
+            ] %}
+            {% for proyecto in proyectos %}
+                <article class="tarjeta bloque">
+                    <span class="pildora">{{ proyecto.folio_proyecto }}</span>
+                    <h3>{{ proyecto.nombre_evento }}</h3>
+                    <div class="rejilla cortesias-rapidas">
+                        {% for tipo, titulo, ayuda in tipos_cortesia %}
+                            <form class="tarjeta-mini" method="post" action="{{ url_for('registrar_cortesia_cliente', id_proyecto=proyecto.id_proyecto) }}">
+                                <input type="hidden" name="tipo_cortesia" value="{{ tipo }}">
+                                <strong>{{ titulo }}</strong>
+                                <input name="titulo" value="{{ titulo }}" required>
+                                <textarea name="detalle" rows="2" placeholder="{{ ayuda }}"></textarea>
+                                <button class="boton boton-chico" type="submit">Guardar</button>
+                            </form>
+                        {% endfor %}
+                    </div>
+                    <div class="notificaciones bloque-lista">
+                        {% for cortesia in cortesias if cortesia.id_proyecto == proyecto.id_proyecto %}
+                            <article>
+                                <strong>{{ cortesia.titulo }} - {{ cortesia.estatus }}</strong>
+                                <p>{{ cortesia.detalle }}</p>
+                            </article>
+                        {% else %}
+                            <p class="texto-suave">Sin funciones registradas para este evento.</p>
+                        {% endfor %}
+                    </div>
+                </article>
+            {% endfor %}
+        </section>
+    </div>
+
+    <div class="dos-columnas">
         <section>
             <h2>Notificaciones</h2>
             <div class="notificaciones">
@@ -130,12 +165,17 @@
                     <p class="texto-suave">Sin notificaciones.</p>
                 {% endfor %}
             </div>
+        </section>
 
+        <section>
             <h2>Paquetes visibles</h2>
             <div class="lista-precios">
                 {% for paquete in paquetes %}
                     <div>
-                        <span>{{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}</span>
+                        <span>
+                            {{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}
+                            <small>{{ paquete.platillos }}</small>
+                        </span>
                         <strong>${{ "%.2f"|format(paquete.precio_base) }}</strong>
                     </div>
                 {% endfor %}
