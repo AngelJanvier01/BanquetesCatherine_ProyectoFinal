@@ -25,13 +25,13 @@ instalar.bat
 4. Para crear el usuario del proyecto, usa una conexion administrativa:
 
 ```txt
-sys/TuClave@//127.0.0.1:1521/FREEPDB1 as sysdba
+sys/TuClave@//127.0.0.1:1521/XEPDB1 as sysdba
 ```
 
 5. Para instalar objetos del proyecto:
 
 ```txt
-BANQUETES_CATHERINE/Catherine2026@//127.0.0.1:1521/FREEPDB1
+BANQUETES_CATHERINE/Catherine2026@//127.0.0.1:1521/XEPDB1
 ```
 
 El instalador no borra bases ni usuarios externos. La limpieza de `database/00_drop_schema_objects.sql` solo actua dentro del esquema conectado.
@@ -57,7 +57,7 @@ Edita `.env` si tu Oracle usa otro host, puerto o servicio:
 ```txt
 ORACLE_HOST=127.0.0.1
 ORACLE_PORT=1521
-ORACLE_SERVICE=FREEPDB1
+ORACLE_SERVICE=XEPDB1
 ORACLE_USER=BANQUETES_CATHERINE
 ORACLE_PASSWORD=Catherine2026
 ```
@@ -133,4 +133,3 @@ Scripts principales:
 - Los paquetes personalizados tienen `visible_publico = 'N'`, `personalizado = 'S'` e `id_cliente` obligatorio.
 - Solo `GERENTE_ADMIN` puede cambiar estatus de gerentes.
 - Las reglas criticas viven en PL/SQL, no solo en la interfaz web.
-

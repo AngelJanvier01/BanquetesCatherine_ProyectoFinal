@@ -1,12 +1,24 @@
--- Ejecutar como SYS/SYSTEM solo si se desea crear un esquema nuevo.
--- Cambia la contrasena si tu profesor lo solicita.
+-- Ejecutar como SYS/SYSTEM solo si se desea crear o reparar el esquema.
+-- No borra usuarios ni bases de datos. Si el usuario existe, solo ajusta clave,
+-- desbloqueo y cuota.
 
-CREATE USER BANQUETES_CATHERINE IDENTIFIED BY Catherine2026
-    DEFAULT TABLESPACE USERS
-    TEMPORARY TABLESPACE TEMP
-    QUOTA UNLIMITED ON USERS;
+DECLARE
+    v_existe NUMBER;
+BEGIN
+    SELECT COUNT(1)
+    INTO v_existe
+    FROM DBA_USERS
+    WHERE USERNAME = 'BANQUETES_CATHERINE';
+
+    IF v_existe = 0 THEN
+        EXECUTE IMMEDIATE 'CREATE USER BANQUETES_CATHERINE IDENTIFIED BY Catherine2026 DEFAULT TABLESPACE USERS TEMPORARY TABLESPACE TEMP QUOTA UNLIMITED ON USERS';
+    ELSE
+        EXECUTE IMMEDIATE 'ALTER USER BANQUETES_CATHERINE IDENTIFIED BY Catherine2026 ACCOUNT UNLOCK';
+        EXECUTE IMMEDIATE 'ALTER USER BANQUETES_CATHERINE QUOTA UNLIMITED ON USERS';
+    END IF;
+END;
+/
 
 GRANT CONNECT, RESOURCE, CREATE VIEW, CREATE SYNONYM TO BANQUETES_CATHERINE;
 
 -- En Oracle 12c+ a veces RESOURCE ya no otorga cuota efectiva; se deja explicito arriba.
-

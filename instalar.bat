@@ -46,11 +46,22 @@ if not exist ".env" (
     echo [OK] .env ya existe
 )
 
-where sql >nul 2>nul
+where sqlplus >nul 2>nul
 if errorlevel 1 (
-    echo [INFO] SQLcl no fue encontrado. Se intentara instalar con winget.
-    winget install --id Oracle.SQLcl -e --accept-package-agreements --accept-source-agreements
-    echo [INFO] Si SQLcl acaba de instalarse y no se detecta, cierra y abre de nuevo la terminal.
+    where sql >nul 2>nul
+    if errorlevel 1 (
+        echo [INFO] No se encontro SQLPlus ni SQLcl. Se intentara instalar SQLcl con winget.
+        winget install --id Oracle.SQLcl -e --accept-package-agreements --accept-source-agreements
+        set "CLIENTE_SQL=sql"
+    ) else (
+        set "CLIENTE_SQL=sql"
+    )
+) else (
+    set "CLIENTE_SQL=sqlplus"
+)
+
+if /I "%CLIENTE_SQL%"=="sqlplus" (
+    echo [OK] SQLPlus detectado
 ) else (
     echo [OK] SQLcl detectado
 )
@@ -62,25 +73,25 @@ echo.
 echo Se instalaran objetos dentro del esquema BANQUETES_CATHERINE.
 echo No se eliminan usuarios ni bases de datos externas.
 echo.
-where sql >nul 2>nul
+where %CLIENTE_SQL% >nul 2>nul
 if errorlevel 1 (
-    echo [ERROR] SQLcl no esta disponible en PATH. Ejecuta el SQL manualmente en SQL Developer.
+    echo [ERROR] No hay cliente Oracle disponible en PATH. Ejecuta el SQL manualmente en SQL Developer.
     goto fin
 )
 
 set /p CREAR_USUARIO="Deseas crear el usuario BANQUETES_CATHERINE con una conexion admin? (S/N): "
 if /I "%CREAR_USUARIO%"=="S" (
-    set /p CONEXION_ADMIN="Conexion admin (ejemplo sys/TuClave@//127.0.0.1:1521/FREEPDB1 as sysdba): "
+    set /p CONEXION_ADMIN="Conexion admin (ejemplo sys/TuClave@//127.0.0.1:1521/XEPDB1 as sysdba): "
     pushd database
-    sql -L "%CONEXION_ADMIN%" @01_crear_usuario_opcional.sql
+    %CLIENTE_SQL% -L "%CONEXION_ADMIN%" @01_crear_usuario_opcional.sql
     popd
 )
 
 echo.
-set /p CONEXION_APP="Conexion del esquema (ejemplo BANQUETES_CATHERINE/Catherine2026@//127.0.0.1:1521/FREEPDB1): "
+set /p CONEXION_APP="Conexion del esquema (ejemplo BANQUETES_CATHERINE/Catherine2026@//127.0.0.1:1521/XEPDB1): "
 
 pushd database
-sql -L "%CONEXION_APP%" @99_instalar_todo.sql
+%CLIENTE_SQL% -L "%CONEXION_APP%" @99_instalar_todo.sql
 popd
 
 :fin
