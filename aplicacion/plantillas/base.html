@@ -17,19 +17,19 @@
             <a href="{{ url_for('complementos_publicos') }}">Complementos</a>
             <a href="{{ url_for('salones_publicos') }}">Salones</a>
             <button class="enlace-nav abrir-agenda" type="button">Agendar</button>
-            <a href="{{ url_for('consola_sql') }}" target="_blank">Consola SQL</a>
             {% if session.get("rol") == "CLIENTE" %}
                 <a href="{{ url_for('panel_cliente') }}">Mi panel</a>
             {% elif session.get("rol") in ["GERENTE", "GERENTE_ADMIN"] %}
                 <a href="{{ url_for('panel_gerente') }}">Gerencia</a>
                 <a href="{{ url_for('reportes') }}">Reportes</a>
+                <a href="{{ url_for('consola_sql') }}" target="_blank">Monitor</a>
             {% elif session.get("rol") == "CHEF" %}
                 <a href="{{ url_for('panel_chef') }}">Cocina</a>
             {% endif %}
             {% if session.get("id_usuario") %}
                 <a href="{{ url_for('salir') }}">Salir</a>
             {% else %}
-                <a class="boton boton-oscuro" href="{{ url_for('login') }}">Login</a>
+                <a class="boton boton-oscuro" href="{{ url_for('login') }}">Acceso</a>
             {% endif %}
         </nav>
     </header>
@@ -54,10 +54,10 @@
             <button class="modal-cerrar" type="button" data-cerrar-agenda aria-label="Cerrar">x</button>
             <div class="encabezado-seccion">
                 <div>
-                    <p class="etiqueta">Solicitud publica</p>
-                    <h2 id="tituloAgenda">Agendar servicio</h2>
+                    <p class="etiqueta">Cotizacion personalizada</p>
+                    <h2 id="tituloAgenda">Agenda tu evento</h2>
                 </div>
-                <p>La solicitud queda pendiente hasta que gerencia confirme salon y registre anticipo.</p>
+                <p>Comparte fecha, invitados y preferencias. Nuestro equipo revisara disponibilidad y te contactara con una propuesta.</p>
             </div>
             <form class="formulario formulario-modal" method="post" action="{{ url_for('crear_solicitud') }}">
                 <label>Nombre contacto
@@ -94,8 +94,8 @@
     </div>
 
     <footer class="pie">
-        <span>Proyecto final Base de Datos II</span>
-        <span>Oracle + Flask</span>
+        <span>Banquetes Catherine · Zacatecas</span>
+        <span>Bodas, recepciones y eventos empresariales</span>
     </footer>
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>

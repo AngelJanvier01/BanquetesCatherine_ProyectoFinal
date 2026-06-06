@@ -7,13 +7,20 @@
         <div>
             <p class="etiqueta">Convenios locales</p>
             <h1>Salones en Zacatecas</h1>
-            <p>Opciones locales con capacidad, renta y contacto de instalacion para validar proyectos.</p>
+            <p>Opciones locales con capacidad, renta y contacto de instalacion para planear tu recepcion.</p>
         </div>
         <button class="boton boton-oscuro abrir-agenda" type="button">Agendar</button>
     </div>
+    <div class="barra-filtros" aria-label="Filtrar salones por capacidad">
+        <button class="filtro-catalogo activo" type="button" data-filtro-salon="TODOS">Todos</button>
+        <button class="filtro-catalogo" type="button" data-filtro-salon="120">Hasta 120</button>
+        <button class="filtro-catalogo" type="button" data-filtro-salon="250">121 a 250</button>
+        <button class="filtro-catalogo" type="button" data-filtro-salon="500">Grandes</button>
+        <span id="conteoSalones" class="contador-filtro"></span>
+    </div>
     <div class="rejilla tarjetas tarjetas-salones">
         {% for salon in salones %}
-            <article class="tarjeta tarjeta-salon">
+            <article class="tarjeta tarjeta-salon animar-entrada" data-tarjeta-salon data-capacidad="{{ salon.capacidad_maxima }}">
                 {% if salon.foto_url %}
                     <img src="{{ url_for('static', filename=salon.foto_url) }}" alt="{{ salon.nombre }}">
                 {% endif %}

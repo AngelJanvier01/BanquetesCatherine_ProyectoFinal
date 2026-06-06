@@ -71,16 +71,19 @@ def api_opciones_solicitud():
 
 
 @app.get("/consola-sql")
+@sesion_requerida("GERENTE", "GERENTE_ADMIN")
 def consola_sql():
     return render_template("consola_sql.html", eventos=leer_eventos_sql())
 
 
 @app.get("/api/consola-sql")
+@sesion_requerida("GERENTE", "GERENTE_ADMIN")
 def api_consola_sql():
     return jsonify(leer_eventos_sql())
 
 
 @app.post("/consola-sql/limpiar")
+@sesion_requerida("GERENTE", "GERENTE_ADMIN")
 def limpiar_consola_sql():
     limpiar_eventos_sql()
     registrar_evento_sql(

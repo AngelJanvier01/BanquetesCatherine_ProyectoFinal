@@ -7,13 +7,20 @@
         <div>
             <p class="etiqueta">Catalogo publico</p>
             <h1>Platillos</h1>
-            <p>Precios, dificultad y datos utiles para planear paquetes de banquete.</p>
+            <p>Opciones de cocina para armar entradas, platos fuertes y postres de tu recepcion.</p>
         </div>
         <button class="boton boton-oscuro abrir-agenda" type="button">Agendar</button>
     </div>
+    <div class="barra-filtros" aria-label="Filtrar platillos">
+        <button class="filtro-catalogo activo" type="button" data-filtro-platillo="TODOS">Todos</button>
+        <button class="filtro-catalogo" type="button" data-filtro-platillo="ENTRADA">Entradas</button>
+        <button class="filtro-catalogo" type="button" data-filtro-platillo="FUERTE">Platos fuertes</button>
+        <button class="filtro-catalogo" type="button" data-filtro-platillo="POSTRE">Postres</button>
+        <span id="conteoPlatillos" class="contador-filtro"></span>
+    </div>
     <div class="rejilla tarjetas">
         {% for platillo in platillos %}
-            <article class="tarjeta tarjeta-catalogo">
+            <article class="tarjeta tarjeta-catalogo animar-entrada" data-tarjeta-platillo data-categoria="{{ platillo.categoria }}">
                 <div class="tarjeta-cabecera">
                     <span class="pildora">{{ platillo.categoria }}</span>
                     <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
@@ -21,10 +28,10 @@
                 <h3>{{ platillo.nombre }}</h3>
                 <p>{{ platillo.descripcion }}</p>
                 <dl class="datos-mini">
-                    <div><dt>Costo</dt><dd>${{ "%.2f"|format(platillo.costo_estimado) }}</dd></div>
-                    <div><dt>Dificultad</dt><dd>{{ platillo.dificultad }}</dd></div>
+                    <div><dt>Precio</dt><dd>${{ "%.2f"|format(platillo.precio) }}</dd></div>
+                    <div><dt>Estilo</dt><dd>{{ platillo.tipo_dieta }}</dd></div>
                     <div><dt>Porciones</dt><dd>{{ platillo.porciones_base }}</dd></div>
-                    <div><dt>Ingredientes</dt><dd>{{ platillo.numero_ingredientes }}</dd></div>
+                    <div><dt>Categoria</dt><dd>{{ platillo.categoria }}</dd></div>
                 </dl>
             </article>
         {% endfor %}

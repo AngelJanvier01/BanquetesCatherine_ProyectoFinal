@@ -6,52 +6,57 @@
     <div class="hero-contenido">
         <p class="etiqueta">Banquetes y recepciones en Zacatecas</p>
         <h1>Banquetes Catherine</h1>
-        <p>Servicio integral para bodas, reuniones de negocio, eventos formales y celebraciones familiares con control de solicitudes, proyectos, pagos, salones e ingredientes.</p>
+        <p>Cocina cuidada, montaje elegante y coordinacion cercana para bodas, reuniones empresariales, celebraciones familiares y eventos formales.</p>
         <div class="acciones-hero">
-            <button class="boton boton-claro abrir-agenda" type="button">Agendar servicio</button>
-            <a class="boton boton-transparente" href="{{ url_for('salones_publicos') }}">Ver salones</a>
+            <button class="boton boton-claro abrir-agenda" type="button">Cotizar mi evento</button>
+            <a class="boton boton-transparente" href="{{ url_for('platillos_publicos') }}">Ver menu</a>
+        </div>
+        <div class="hero-datos">
+            <div><strong>12</strong><span>platillos base</span></div>
+            <div><strong>6</strong><span>salones locales</span></div>
+            <div><strong>4</strong><span>pasos para reservar</span></div>
         </div>
     </div>
 </section>
 
-<section class="seccion contenedor">
+<section class="seccion contenedor animar-entrada">
     <div class="encabezado-seccion">
         <div>
-            <p class="etiqueta">Operacion del negocio</p>
-            <h2>De la solicitud al evento finiquitado</h2>
+            <p class="etiqueta">Servicio integral</p>
+            <h2>Tu evento con una sola coordinacion</h2>
         </div>
-        <button class="boton boton-oscuro abrir-agenda" type="button">Solicitar cotizacion</button>
+        <button class="boton boton-oscuro abrir-agenda" type="button">Agendar asesoria</button>
     </div>
     <div class="rejilla tarjetas">
-        <article class="tarjeta tarjeta-resumen">
-            <span class="pildora">1</span>
-            <h3>Solicitud publica</h3>
-            <p>El cliente propone fecha, salon, invitados y paquete. Todavia no es proyecto.</p>
+        <article class="tarjeta tarjeta-resumen animar-entrada">
+            <span class="pildora">Menu</span>
+            <h3>Cocina para cada ocasion</h3>
+            <p>Entradas, platos fuertes, postres y opciones ligeras o premium ajustadas al tipo de evento.</p>
         </article>
-        <article class="tarjeta tarjeta-resumen">
-            <span class="pildora">2</span>
-            <h3>Confirmacion gerente</h3>
-            <p>Gerencia valida capacidad del salon, registra cliente, total estimado y anticipo.</p>
+        <article class="tarjeta tarjeta-resumen animar-entrada">
+            <span class="pildora">Salon</span>
+            <h3>Espacios con convenio</h3>
+            <p>Te ayudamos a elegir un recinto local con capacidad adecuada, ubicacion conveniente y montaje viable.</p>
         </article>
-        <article class="tarjeta tarjeta-resumen">
-            <span class="pildora">3</span>
-            <h3>Proyecto activo</h3>
-            <p>El cliente consulta costos, ubicacion, invitados, paquetes privados y notificaciones.</p>
+        <article class="tarjeta tarjeta-resumen animar-entrada">
+            <span class="pildora">Montaje</span>
+            <h3>Detalles que se notan</h3>
+            <p>Complementos como barra de bebidas, loza, decoracion floral, meseros y tornafiesta.</p>
         </article>
-        <article class="tarjeta tarjeta-resumen">
-            <span class="pildora">4</span>
-            <h3>Cocina y reportes</h3>
-            <p>Chef administra recetas e ingredientes; gerencia revisa cobranza y popularidad.</p>
+        <article class="tarjeta tarjeta-resumen animar-entrada">
+            <span class="pildora">Seguimiento</span>
+            <h3>Acompanamiento claro</h3>
+            <p>Desde la cotizacion hasta el cierre, mantenemos confirmaciones, invitados y pagos ordenados.</p>
         </article>
     </div>
 </section>
 
-<section class="seccion banda">
+<section class="seccion banda banda-destacada">
     <div class="contenedor dos-columnas seccion-ajustada">
         <div>
-            <p class="etiqueta">Catalogos</p>
-            <h2>Consulta solo lo que necesitas</h2>
-            <p>El sitio carga platillos, complementos y salones en paginas separadas para que la consola SQL muestre consultas puntuales durante la demostracion.</p>
+            <p class="etiqueta">Explora opciones</p>
+            <h2>Empieza por el menu, los extras o el salon</h2>
+            <p>Revisa ideas reales para tu recepcion y solicita una propuesta con fecha, invitados y preferencias.</p>
         </div>
         <div class="acciones-panel">
             <a class="boton boton-oscuro" href="{{ url_for('platillos_publicos') }}">Platillos</a>
@@ -61,31 +66,63 @@
     </div>
 </section>
 
-<section class="seccion contenedor">
+<section class="seccion contenedor animar-entrada">
     <div class="encabezado-seccion">
         <div>
-            <p class="etiqueta">Demo en clase</p>
-            <h2>Usuarios de prueba</h2>
+            <p class="etiqueta">Eventos</p>
+            <h2>Atendemos momentos distintos con el mismo cuidado</h2>
         </div>
-        <a class="boton boton-oscuro" href="{{ url_for('login') }}">Entrar</a>
     </div>
-    <div class="tabla-contenedor tabla-compacta">
-        <table>
-            <thead>
-                <tr>
-                    <th>Rol</th>
-                    <th>Usuario</th>
-                    <th>Clave</th>
-                    <th>Que demuestra</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr><td>Cliente</td><td>cliente.demo</td><td>cliente123</td><td>Solicitudes, proyectos, invitados y pagos.</td></tr>
-                <tr><td>Gerente</td><td>gerente.lucia</td><td>gerente123</td><td>Conversion de solicitudes, pagos, cancelaciones y paquetes.</td></tr>
-                <tr><td>Chef</td><td>chef.renata</td><td>gerente123</td><td>Platillos, costos, dificultad, ingredientes e instrucciones.</td></tr>
-                <tr><td>Admin</td><td>admin.catherine</td><td>admin123</td><td>Cambio de estatus de gerentes y reportes.</td></tr>
-            </tbody>
-        </table>
+    <div class="rejilla tarjetas">
+        <article class="tarjeta tarjeta-evento animar-entrada">
+            <span class="pildora">Bodas</span>
+            <h3>Recepciones elegantes</h3>
+            <p>Menus de varios tiempos, montaje formal, postres y seguimiento para invitados.</p>
+            <button class="boton boton-chico abrir-agenda" type="button">Cotizar boda</button>
+        </article>
+        <article class="tarjeta tarjeta-evento animar-entrada">
+            <span class="pildora">Empresarial</span>
+            <h3>Reuniones y congresos</h3>
+            <p>Servicio puntual, opciones ejecutivas y complementos para eventos corporativos.</p>
+            <button class="boton boton-chico abrir-agenda" type="button">Cotizar evento</button>
+        </article>
+        <article class="tarjeta tarjeta-evento animar-entrada">
+            <span class="pildora">Social</span>
+            <h3>Celebraciones familiares</h3>
+            <p>Paquetes flexibles para bautizos, aniversarios, XV anios y comidas privadas.</p>
+            <button class="boton boton-chico abrir-agenda" type="button">Cotizar recepcion</button>
+        </article>
+    </div>
+</section>
+
+<section class="seccion contenedor animar-entrada">
+    <div class="encabezado-seccion">
+        <div>
+            <p class="etiqueta">Como trabajamos</p>
+            <h2>Un proceso simple para reservar</h2>
+        </div>
+    </div>
+    <div class="linea-proceso">
+        <article>
+            <strong>1</strong>
+            <h3>Cuentanos tu idea</h3>
+            <p>Fecha, numero de invitados, tipo de evento y preferencias de menu.</p>
+        </article>
+        <article>
+            <strong>2</strong>
+            <h3>Validamos disponibilidad</h3>
+            <p>Revisamos capacidad del salon, propuesta de paquete y complementos necesarios.</p>
+        </article>
+        <article>
+            <strong>3</strong>
+            <h3>Confirmas con anticipo</h3>
+            <p>Al confirmar, tu evento queda reservado y empieza el seguimiento operativo.</p>
+        </article>
+        <article>
+            <strong>4</strong>
+            <h3>Disfrutas el evento</h3>
+            <p>El equipo coordina cocina, montaje, servicio y cambios permitidos con anticipacion.</p>
+        </article>
     </div>
 </section>
 {% endblock %}

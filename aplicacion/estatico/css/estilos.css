@@ -58,6 +58,12 @@ a {
     border-bottom: 1px solid var(--linea);
     backdrop-filter: blur(12px);
     flex-shrink: 0;
+    transition: box-shadow 180ms ease, background 180ms ease, padding 180ms ease;
+}
+
+.barra-elevada {
+    background: rgba(251, 250, 247, 0.98);
+    box-shadow: 0 10px 30px rgba(24, 31, 26, 0.08);
 }
 
 .marca {
@@ -103,13 +109,26 @@ a {
     min-height: 78vh;
     display: flex;
     align-items: center;
+    position: relative;
+    overflow: hidden;
     background:
         linear-gradient(90deg, rgba(14, 28, 24, 0.86), rgba(14, 28, 24, 0.42), rgba(14, 28, 24, 0.08)),
         url("../img/hero-banquetes.png") center / cover no-repeat;
     color: var(--blanco);
 }
 
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: auto 0 0;
+    height: 120px;
+    background: linear-gradient(180deg, rgba(251, 250, 247, 0), var(--fondo));
+    pointer-events: none;
+}
+
 .hero-contenido {
+    position: relative;
+    z-index: 1;
     width: min(680px, 92vw);
     margin-left: clamp(20px, 6vw, 84px);
     padding-block: 80px;
@@ -135,9 +154,82 @@ a {
     margin-top: 22px;
 }
 
+.hero-datos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    width: min(560px, 100%);
+    margin-top: 28px;
+}
+
+.hero-datos div {
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(8px);
+}
+
+.hero-datos strong,
+.hero-datos span {
+    display: block;
+}
+
+.hero-datos strong {
+    font-size: 1.65rem;
+    line-height: 1;
+}
+
+.hero-datos span {
+    margin-top: 5px;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.86rem;
+}
+
+.animar-entrada {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 520ms ease, transform 520ms ease;
+}
+
+.animar-entrada.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 .acciones-panel {
     justify-content: flex-end;
     margin-top: 0;
+}
+
+.linea-proceso {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.linea-proceso article {
+    padding: 22px 0;
+    border-top: 2px solid var(--dorado);
+}
+
+.linea-proceso strong {
+    display: inline-grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    margin-bottom: 12px;
+    background: var(--verde);
+    color: var(--blanco);
+    border-radius: 50%;
+}
+
+.linea-proceso h3,
+.linea-proceso p {
+    margin: 0 0 8px;
+}
+
+.linea-proceso p {
+    color: var(--suave);
 }
 
 .etiqueta,
@@ -178,6 +270,12 @@ a {
     border-block: 1px solid var(--linea);
 }
 
+.banda-destacada {
+    background:
+        linear-gradient(90deg, rgba(25, 56, 47, 0.07), rgba(182, 138, 58, 0.12)),
+        #f0ebe2;
+}
+
 .encabezado-seccion {
     display: flex;
     align-items: end;
@@ -213,6 +311,13 @@ a {
     border: 1px solid var(--linea);
     border-radius: 8px;
     box-shadow: 0 6px 20px rgba(24, 31, 26, 0.06);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+}
+
+.tarjeta:hover {
+    transform: translateY(-3px);
+    border-color: rgba(182, 138, 58, 0.55);
+    box-shadow: 0 16px 34px rgba(24, 31, 26, 0.11);
 }
 
 .tarjeta h3,
@@ -234,6 +339,51 @@ a {
 
 .tarjeta-resumen {
     min-height: 190px;
+}
+
+.tarjeta-evento {
+    min-height: 230px;
+}
+
+.tarjeta-evento .boton {
+    margin-top: auto;
+    width: fit-content;
+}
+
+.barra-filtros {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: -6px 0 22px;
+}
+
+.filtro-catalogo {
+    min-height: 38px;
+    padding: 8px 13px;
+    border: 1px solid var(--linea);
+    border-radius: 999px;
+    background: var(--blanco);
+    color: var(--verde);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+
+.filtro-catalogo.activo,
+.filtro-catalogo:hover {
+    background: var(--verde);
+    border-color: var(--verde);
+    color: var(--blanco);
+}
+
+.contador-filtro {
+    color: var(--suave);
+    font-size: 0.92rem;
+}
+
+[hidden] {
+    display: none !important;
 }
 
 .tarjetas-salones {
@@ -403,6 +553,73 @@ a {
     padding: 40px 0;
 }
 
+.pantalla-acceso {
+    min-height: 72vh;
+    display: grid;
+    grid-template-columns: minmax(320px, 430px) minmax(280px, 1fr);
+    gap: 28px;
+    align-items: center;
+    padding-block: 52px;
+}
+
+.pantalla-acceso .formulario-login {
+    width: 100%;
+}
+
+.ayuda-login {
+    display: grid;
+    gap: 18px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+    box-shadow: var(--sombra);
+}
+
+.ayuda-login h2,
+.ayuda-login p {
+    margin: 0 0 8px;
+}
+
+.ayuda-login h2 {
+    color: var(--verde);
+}
+
+.opciones-login {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.opciones-login button {
+    display: grid;
+    gap: 6px;
+    min-height: 118px;
+    padding: 16px;
+    text-align: left;
+    background: #fffdf9;
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+    color: var(--texto);
+    cursor: pointer;
+    font: inherit;
+}
+
+.opciones-login button:hover,
+.opciones-login button:focus {
+    border-color: var(--dorado);
+    outline: 2px solid rgba(182, 138, 58, 0.18);
+}
+
+.opciones-login strong {
+    color: var(--verde);
+}
+
+.opciones-login span {
+    color: var(--suave);
+    font-size: 0.92rem;
+}
+
 .boton {
     display: inline-flex;
     align-items: center;
@@ -413,6 +630,12 @@ a {
     border-radius: 6px;
     font-weight: 800;
     cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.boton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 18px rgba(24, 31, 26, 0.14);
 }
 
 .boton-oscuro {
@@ -771,9 +994,18 @@ td span {
             url("../img/hero-banquetes.png") center / cover no-repeat;
     }
 
-    .formulario-dos-columnas,
-    .dos-columnas {
+    .hero-datos {
         grid-template-columns: 1fr;
+    }
+
+    .formulario-dos-columnas,
+    .dos-columnas,
+    .pantalla-acceso {
+        grid-template-columns: 1fr;
+    }
+
+    .linea-proceso {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .acciones-panel {
@@ -785,6 +1017,10 @@ td span {
     }
 
     .formulario.compacto {
+        grid-template-columns: 1fr;
+    }
+
+    .opciones-login {
         grid-template-columns: 1fr;
     }
 
@@ -828,12 +1064,27 @@ td span {
     }
 
     .boton,
+    .tarjeta-evento .boton,
     .consola-acciones form,
     .consola-acciones button {
         width: 100%;
     }
 
+    .barra-filtros {
+        align-items: stretch;
+    }
+
+    .filtro-catalogo,
+    .contador-filtro {
+        flex: 1 1 calc(50% - 10px);
+        text-align: center;
+    }
+
     .datos-mini {
+        grid-template-columns: 1fr;
+    }
+
+    .linea-proceso {
         grid-template-columns: 1fr;
     }
 

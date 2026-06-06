@@ -1,19 +1,45 @@
 {% extends "base.html" %}
-{% block titulo %}Login · Banquetes Catherine{% endblock %}
+{% block titulo %}Acceso · Banquetes Catherine{% endblock %}
 
 {% block contenido %}
-<section class="pantalla-centrada">
-    <form class="formulario formulario-login" method="post">
+<section class="pantalla-acceso contenedor">
+    <form class="formulario formulario-login" method="post" id="formularioLogin">
+        <p class="etiqueta">Portal privado</p>
         <h1>Acceso</h1>
         <label>Usuario
-            <input name="nombre_usuario" required autocomplete="username">
+            <input id="campoUsuarioLogin" name="nombre_usuario" required autocomplete="username">
         </label>
         <label>Contrasena
-            <input name="contrasena" type="password" required autocomplete="current-password">
+            <input id="campoContrasenaLogin" name="contrasena" type="password" required autocomplete="current-password">
         </label>
         <button class="boton boton-oscuro" type="submit">Entrar</button>
-        <p class="texto-suave">Demo: admin.catherine/admin123, gerente.lucia/gerente123, cliente.demo/cliente123</p>
+        <p class="texto-suave">Clientes y equipo interno pueden consultar su informacion desde este portal.</p>
     </form>
+
+    <aside class="ayuda-login" aria-label="Ayuda de inicio de sesion">
+        <div>
+            <p class="etiqueta">Ayuda de acceso</p>
+            <h2>Entrar como</h2>
+            <p>Selecciona un perfil para rellenar usuario y contrasena automaticamente.</p>
+        </div>
+        <div class="opciones-login">
+            <button type="button" data-login-usuario="cliente.demo" data-login-contrasena="cliente123">
+                <strong>Cliente</strong>
+                <span>Ver solicitudes, eventos, pagos e invitados.</span>
+            </button>
+            <button type="button" data-login-usuario="gerente.lucia" data-login-contrasena="gerente123">
+                <strong>Gerente</strong>
+                <span>Atender solicitudes, proyectos, pagos y paquetes.</span>
+            </button>
+            <button type="button" data-login-usuario="chef.renata" data-login-contrasena="gerente123">
+                <strong>Cocina</strong>
+                <span>Administrar platillos, recetas e ingredientes.</span>
+            </button>
+            <button type="button" data-login-usuario="admin.catherine" data-login-contrasena="admin123">
+                <strong>Administracion</strong>
+                <span>Reportes, gerentes y seguimiento general.</span>
+            </button>
+        </div>
+    </aside>
 </section>
 {% endblock %}
-

@@ -40,6 +40,10 @@ INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo e
 INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'S');
 INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'S');
 INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ASADO DE BODA ZACATECANO', 'Guiso tradicional de cerdo con chile rojo y especias', 210.00, 92.00, 6, 'FUERTE', 'REGIONAL', 'ALTA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'LOMO EN SALSA DE VINO TINTO', 'Lomo de cerdo glaseado con salsa de vino y hierbas', 235.00, 105.00, 6, 'FUERTE', 'FORMAL', 'ALTA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CANAPES DE QUESO Y MEMBRILLO', 'Bocados frios para recepcion con queso regional y membrillo', 95.00, 36.00, 12, 'ENTRADA', 'REGIONAL', 'BAJA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'MOUSSE DE CHOCOLATE', 'Postre individual con chocolate semiamargo y crema batida', 80.00, 31.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'S');
 
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'FILETE DE RES', 'GRAMOS', 'GRANEL', 'Corte fresco');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE MORRON', 'PIEZAS', 'PIEZA', 'Rojo o verde');
@@ -61,6 +65,20 @@ INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'HARINA', 'GRAMOS', 'BOL
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'LECHE', 'MILILITROS', 'LITRO', 'Entera');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'AZUCAR', 'GRAMOS', 'BOLSA', 'Refinada');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'SAL', 'GRAMOS', 'GRANEL', 'Mesa');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'PIERNA DE CERDO', 'GRAMOS', 'GRANEL', 'Para asado regional');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE GUAJILLO', 'GRAMOS', 'BOLSA', 'Seco, limpio y desvenado');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE ANCHO', 'GRAMOS', 'BOLSA', 'Seco');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'AJO', 'DIENTES', 'PIEZA', 'Fresco');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'COMINO', 'GRAMOS', 'FRASCO', 'Molido');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'OREGANO', 'GRAMOS', 'FRASCO', 'Seco');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'VINO TINTO', 'MILILITROS', 'BOTELLA', 'Para salsa');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'ROMERO', 'GRAMOS', 'MANOJO', 'Fresco');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'QUESO DE CABRA', 'GRAMOS', 'PAQUETE', 'Regional');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'MEMBRILLO', 'GRAMOS', 'BARRA', 'Dulce regional');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'PAN BAGUETTE', 'PIEZAS', 'PIEZA', 'Para canapes');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHOCOLATE SEMIAMARGO', 'GRAMOS', 'BARRA', 'Reposteria');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CREMA PARA BATIR', 'MILILITROS', 'LITRO', 'Refrigerada');
+INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'GELATINA SIN SABOR', 'GRAMOS', 'SOBRE', 'Para mousse');
 
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 1, 1, 1000);
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 1, 2, 4);
@@ -85,6 +103,21 @@ INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 7, 16,
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 8, 17, 400);
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 8, 18, 1500);
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 8, 19, 500);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 9, 21, 1800);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 9, 22, 120);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 9, 23, 80);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 9, 24, 6);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 9, 25, 8);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 10, 21, 1400);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 10, 27, 500);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 10, 28, 20);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 10, 13, 120);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 11, 29, 600);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 11, 30, 450);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 11, 31, 3);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 32, 500);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 33, 1000);
+INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 34, 20);
 
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 1, 1, 'Cortar carne y verduras en piezas uniformes.', 'Mantener tamanio similar.');
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 1, 2, 'Armar brochetas y asar.', 'Revisar termino de carne.');
@@ -93,6 +126,13 @@ INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 2, 2, 'Rellenar, capear 
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 3, 1, 'Sellar filete y preparar salsa.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 4, 1, 'Condimentar pescado y cocer al vapor.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 5, 1, 'Sofreir pollo, agregar cerveza y reducir.', NULL);
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 9, 1, 'Cocer la pierna de cerdo hasta suavizar.', 'Reservar caldo para la salsa.');
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 9, 2, 'Licuar chiles, ajo y especias; guisar con la carne.', 'Reducir hasta lograr textura espesa.');
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 10, 1, 'Sellar el lomo y preparar reduccion de vino tinto.', NULL);
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 10, 2, 'Hornear con romero y banar con salsa.', NULL);
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 11, 1, 'Cortar baguette, montar queso de cabra y membrillo.', NULL);
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 1, 'Fundir chocolate y mezclar con crema batida.', NULL);
+INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 2, 'Refrigerar en porciones individuales.', NULL);
 
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'BARRA DE BEBIDAS', 'Aguas frescas y refrescos por persona', 55.00, 'S');
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'MESA DE POSTRES', 'Variedad de postres individuales', 85.00, 'S');
@@ -122,14 +162,17 @@ INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 2, 7, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 2, 1, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 2, 8, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 6, 1);
-INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 3, 1);
-INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 8, 1);
+INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 10, 1);
+INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 12, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 4, 7, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 4, 4, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 5, 6, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 5, 3, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 6, 7, 1);
 INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 6, 2, 1);
+INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 1, 11, 1);
+INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 2, 10, 1);
+INSERT INTO PAQUETE_PLATILLO VALUES (sq_paquete_platillo.NEXTVAL, 3, 11, 1);
 
 -- Solicitudes: algunas pendientes y una convertida para evidenciar separacion.
 INSERT INTO SOLICITUD_SERVICIO (id_solicitud, nombre_contacto, correo, telefono, fecha_evento, numero_invitados, id_salon_preferido, id_paquete_preferido, mensaje, estatus, fecha_solicitud, id_gerente_asignado, observaciones, origen)

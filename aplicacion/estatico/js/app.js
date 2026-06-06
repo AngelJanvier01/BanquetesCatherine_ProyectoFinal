@@ -6,6 +6,27 @@ document.querySelectorAll('input[type="date"]').forEach((campo) => {
     }
 });
 
+const barra = document.querySelector(".barra");
+window.addEventListener("scroll", () => {
+    if (!barra) return;
+    barra.classList.toggle("barra-elevada", window.scrollY > 12);
+});
+
+const elementosAnimados = document.querySelectorAll(".animar-entrada");
+if ("IntersectionObserver" in window) {
+    const observadorEntrada = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+            if (entrada.isIntersecting) {
+                entrada.target.classList.add("visible");
+                observadorEntrada.unobserve(entrada.target);
+            }
+        });
+    }, { threshold: 0.14 });
+    elementosAnimados.forEach((elemento) => observadorEntrada.observe(elemento));
+} else {
+    elementosAnimados.forEach((elemento) => elemento.classList.add("visible"));
+}
+
 const terminalSql = document.getElementById("terminalSql");
 const autoActualizar = document.getElementById("autoActualizar");
 
@@ -123,3 +144,75 @@ document.querySelectorAll("[data-cerrar-agenda]").forEach((elemento) => {
 document.addEventListener("keydown", (evento) => {
     if (evento.key === "Escape") cerrarAgenda();
 });
+
+const campoUsuarioLogin = document.getElementById("campoUsuarioLogin");
+const campoContrasenaLogin = document.getElementById("campoContrasenaLogin");
+
+document.querySelectorAll("[data-login-usuario]").forEach((boton) => {
+    boton.addEventListener("click", () => {
+        if (!campoUsuarioLogin || !campoContrasenaLogin) return;
+        campoUsuarioLogin.value = boton.dataset.loginUsuario || "";
+        campoContrasenaLogin.value = boton.dataset.loginContrasena || "";
+        campoUsuarioLogin.dispatchEvent(new Event("input", { bubbles: true }));
+        campoContrasenaLogin.dispatchEvent(new Event("input", { bubbles: true }));
+        campoContrasenaLogin.focus();
+    });
+});
+
+function activarFiltro(botones, botonActivo) {
+    botones.forEach((boton) => boton.classList.toggle("activo", boton === botonActivo));
+}
+
+const botonesPlatillos = document.querySelectorAll("[data-filtro-platillo]");
+const tarjetasPlatillos = document.querySelectorAll("[data-tarjeta-platillo]");
+const conteoPlatillos = document.getElementById("conteoPlatillos");
+
+function filtrarPlatillos(categoria) {
+    let visibles = 0;
+    tarjetasPlatillos.forEach((tarjeta) => {
+        const mostrar = categoria === "TODOS" || tarjeta.dataset.categoria === categoria;
+        tarjeta.hidden = !mostrar;
+        if (mostrar) visibles += 1;
+    });
+    if (conteoPlatillos) {
+        conteoPlatillos.textContent = `${visibles} opcion${visibles === 1 ? "" : "es"}`;
+    }
+}
+
+botonesPlatillos.forEach((boton) => {
+    boton.addEventListener("click", () => {
+        activarFiltro(botonesPlatillos, boton);
+        filtrarPlatillos(boton.dataset.filtroPlatillo);
+    });
+});
+
+if (tarjetasPlatillos.length) filtrarPlatillos("TODOS");
+
+const botonesSalones = document.querySelectorAll("[data-filtro-salon]");
+const tarjetasSalones = document.querySelectorAll("[data-tarjeta-salon]");
+const conteoSalones = document.getElementById("conteoSalones");
+
+function filtrarSalones(valor) {
+    let visibles = 0;
+    tarjetasSalones.forEach((tarjeta) => {
+        const capacidad = Number(tarjeta.dataset.capacidad || 0);
+        let mostrar = valor === "TODOS";
+        if (valor === "120") mostrar = capacidad <= 120;
+        if (valor === "250") mostrar = capacidad > 120 && capacidad <= 250;
+        if (valor === "500") mostrar = capacidad > 250;
+        tarjeta.hidden = !mostrar;
+        if (mostrar) visibles += 1;
+    });
+    if (conteoSalones) {
+        conteoSalones.textContent = `${visibles} salon${visibles === 1 ? "" : "es"}`;
+    }
+}
+
+botonesSalones.forEach((boton) => {
+    boton.addEventListener("click", () => {
+        activarFiltro(botonesSalones, boton);
+        filtrarSalones(boton.dataset.filtroSalon);
+    });
+});
+
+if (tarjetasSalones.length) filtrarSalones("TODOS");
