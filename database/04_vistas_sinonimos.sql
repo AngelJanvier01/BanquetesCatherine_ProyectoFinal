@@ -1,4 +1,4 @@
--- Vistas para catalogos publicos y reportes.
+-- Vistas para catalogos publicos, paneles y reportes.
 
 CREATE OR REPLACE VIEW vw_platillos_publicos AS
 SELECT
@@ -11,6 +11,7 @@ SELECT
     pl.categoria,
     pl.tipo_dieta,
     pl.dificultad,
+    pl.foto_url,
     (
         SELECT COUNT(1)
         FROM PLATILLO_INGREDIENTE pi
@@ -24,7 +25,9 @@ SELECT
     id_complemento,
     INITCAP(nombre) AS nombre,
     descripcion,
-    precio
+    precio,
+    tipo_complemento,
+    tipo_cobro
 FROM COMPLEMENTO
 WHERE activo = 'S';
 
@@ -50,15 +53,86 @@ SELECT
     id_paquete,
     INITCAP(nombre) AS nombre,
     descripcion,
-    precio_base
+    precio_base,
+    tipo_paquete,
+    margen_ganancia
 FROM PAQUETE
 WHERE activo = 'S'
   AND visible_publico = 'S'
   AND personalizado = 'N';
 
+CREATE OR REPLACE VIEW vw_paquete_resumen AS
+SELECT
+    p.id_paquete,
+    p.nombre,
+    p.descripcion,
+    p.precio_base,
+    p.tipo_paquete,
+    p.margen_ganancia,
+    p.visible_publico,
+    p.personalizado,
+    p.id_cliente,
+    NVL((
+        SELECT SUM(pl.costo_estimado * pp.cantidad)
+        FROM PAQUETE_PLATILLO pp
+        INNER JOIN PLATILLO pl ON pl.id_platillo = pp.id_platillo
+        WHERE pp.id_paquete = p.id_paquete
+    ), 0) AS costo_platillos_persona,
+    NVL((
+        SELECT SUM(CASE WHEN c.tipo_cobro = 'POR_PERSONA' THEN c.precio * pc.cantidad ELSE 0 END)
+        FROM PAQUETE_COMPLEMENTO pc
+        INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento
+        WHERE pc.id_paquete = p.id_paquete
+    ), 0) AS complementos_persona,
+    NVL((
+        SELECT SUM(CASE WHEN c.tipo_cobro = 'POR_EVENTO' THEN c.precio * pc.cantidad ELSE 0 END)
+        FROM PAQUETE_COMPLEMENTO pc
+        INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento
+        WHERE pc.id_paquete = p.id_paquete
+    ), 0) AS complementos_evento,
+    NVL((
+        SELECT LISTAGG(pl.nombre, ', ') WITHIN GROUP (ORDER BY pl.nombre)
+        FROM PAQUETE_PLATILLO pp
+        INNER JOIN PLATILLO pl ON pl.id_platillo = pp.id_platillo
+        WHERE pp.id_paquete = p.id_paquete
+    ), 'Sin platillos') AS platillos,
+    NVL((
+        SELECT LISTAGG(c.nombre, ', ') WITHIN GROUP (ORDER BY c.nombre)
+        FROM PAQUETE_COMPLEMENTO pc
+        INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento
+        WHERE pc.id_paquete = p.id_paquete
+    ), 'Sin complementos') AS complementos
+FROM PAQUETE p
+WHERE p.activo = 'S';
+
+CREATE OR REPLACE VIEW vw_paquete_platillos AS
+SELECT
+    pp.id_paquete,
+    pp.id_platillo,
+    pl.nombre AS platillo,
+    pp.cantidad,
+    pl.precio,
+    pl.costo_estimado,
+    pl.categoria
+FROM PAQUETE_PLATILLO pp
+INNER JOIN PLATILLO pl ON pl.id_platillo = pp.id_platillo;
+
+CREATE OR REPLACE VIEW vw_paquete_complementos AS
+SELECT
+    pc.id_paquete,
+    pc.id_complemento,
+    c.nombre AS complemento,
+    pc.cantidad,
+    c.precio,
+    c.tipo_complemento,
+    c.tipo_cobro
+FROM PAQUETE_COMPLEMENTO pc
+INNER JOIN COMPLEMENTO c ON c.id_complemento = pc.id_complemento;
+
 CREATE OR REPLACE VIEW vw_estado_pago_proyecto AS
 SELECT
     pe.id_proyecto,
+    'BC-' || LPAD(pe.id_proyecto, 5, '0') AS folio_proyecto,
     pe.nombre_evento,
     pe.fecha_evento,
     pe.estatus,
@@ -84,19 +158,25 @@ SELECT
     u.nombre_usuario,
     c.nombre || ' ' || c.apellido AS cliente,
     pe.id_proyecto,
+    'BC-' || LPAD(pe.id_proyecto, 5, '0') AS folio_proyecto,
     pe.nombre_evento,
     pe.fecha_evento,
     pe.numero_invitados,
+    pe.id_salon,
+    pe.id_paquete,
     s.nombre AS salon,
     s.direccion AS direccion_salon,
     s.contacto_instalacion,
     s.telefono_contacto,
     p.nombre AS paquete,
+    pr.platillos,
+    pr.complementos,
     pe.estatus,
     ep.total_estimado,
     ep.total_pagado,
     ep.saldo_pendiente,
     ep.porcentaje_pagado,
+    ROUND(pe.total_estimado / NULLIF(pe.numero_invitados, 0), 2) AS costo_por_persona,
     CASE
         WHEN TRUNC(pe.fecha_evento) - TRUNC(SYSDATE) >= 5 THEN 'S'
         ELSE 'N'
@@ -106,11 +186,13 @@ INNER JOIN USUARIO u ON u.id_usuario = c.id_usuario
 INNER JOIN PROYECTO_EVENTO pe ON pe.id_cliente = c.id_cliente
 INNER JOIN SALON s ON s.id_salon = pe.id_salon
 INNER JOIN PAQUETE p ON p.id_paquete = pe.id_paquete
+INNER JOIN vw_paquete_resumen pr ON pr.id_paquete = p.id_paquete
 INNER JOIN vw_estado_pago_proyecto ep ON ep.id_proyecto = pe.id_proyecto;
 
 CREATE OR REPLACE VIEW vw_solicitudes_pendientes AS
 SELECT
     ss.id_solicitud,
+    'SOL-' || LPAD(ss.id_solicitud, 5, '0') AS folio_solicitud,
     ss.nombre_contacto,
     ss.correo,
     ss.telefono,
@@ -169,6 +251,7 @@ GROUP BY
 CREATE OR REPLACE VIEW vw_eventos_no_finiquitados_21 AS
 SELECT
     pe.id_proyecto,
+    'BC-' || LPAD(pe.id_proyecto, 5, '0') AS folio_proyecto,
     pe.nombre_evento,
     c.nombre || ' ' || c.apellido AS cliente,
     c.telefono,
@@ -206,6 +289,7 @@ SELECT
     c.id_cliente,
     c.nombre || ' ' || c.apellido AS cliente,
     pe.id_proyecto,
+    'BC-' || LPAD(pe.id_proyecto, 5, '0') AS folio_proyecto,
     pe.nombre_evento,
     pe.fecha_evento,
     pa.nombre AS paquete,
@@ -249,28 +333,43 @@ SELECT
 FROM INVITADO_EVENTO inv
 INNER JOIN PROYECTO_EVENTO pe ON pe.id_proyecto = inv.id_proyecto;
 
+CREATE OR REPLACE VIEW vw_cortesias_cliente AS
+SELECT
+    ce.id_cortesia,
+    ce.id_proyecto,
+    pe.id_cliente,
+    ce.tipo_cortesia,
+    ce.titulo,
+    ce.detalle,
+    ce.estatus,
+    ce.fecha_registro
+FROM CORTESIA_EVENTO ce
+INNER JOIN PROYECTO_EVENTO pe ON pe.id_proyecto = ce.id_proyecto;
+
 CREATE OR REPLACE VIEW vw_recetas_chef AS
 SELECT
     pl.id_platillo,
     pl.nombre AS platillo,
+    pl.descripcion,
     pl.categoria,
     pl.precio,
     pl.costo_estimado,
     pl.dificultad,
     pl.porciones_base,
+    pl.foto_url,
     i.id_ingrediente,
     i.nombre_ingrediente,
     i.unidad_medida,
     pi.cantidad,
     inst.numero_paso,
-    inst.instruccion
+    inst.instruccion,
+    inst.detalle_instruccion
 FROM PLATILLO pl
 LEFT JOIN PLATILLO_INGREDIENTE pi ON pi.id_platillo = pl.id_platillo
 LEFT JOIN INGREDIENTE i ON i.id_ingrediente = pi.id_ingrediente
 LEFT JOIN INSTRUCCION inst ON inst.id_platillo = pl.id_platillo
 WHERE pl.activo = 'S';
 
--- Sinonimos privados para evidenciar el tema y facilitar consultas en demo.
 CREATE OR REPLACE SYNONYM cat_platillos FOR vw_platillos_publicos;
 CREATE OR REPLACE SYNONYM cat_complementos FOR vw_complementos_publicos;
 CREATE OR REPLACE SYNONYM cat_salones FOR vw_salones_publicos;

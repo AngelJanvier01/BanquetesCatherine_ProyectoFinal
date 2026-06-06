@@ -50,6 +50,7 @@ CREATE TABLE PLATILLO (
     categoria VARCHAR2(60),
     tipo_dieta VARCHAR2(60),
     dificultad VARCHAR2(20) DEFAULT 'MEDIA' NOT NULL,
+    foto_url VARCHAR2(250) DEFAULT 'img/hero-banquetes.png' NOT NULL,
     activo CHAR(1) DEFAULT 'S' NOT NULL,
     CONSTRAINT uq_platillo_nombre UNIQUE (nombre),
     CONSTRAINT ck_platillo_precio CHECK (precio >= 0),
@@ -95,9 +96,12 @@ CREATE TABLE COMPLEMENTO (
     nombre VARCHAR2(120) NOT NULL,
     descripcion VARCHAR2(500),
     precio NUMBER(10,2) NOT NULL,
+    tipo_complemento VARCHAR2(40) DEFAULT 'GENERAL' NOT NULL,
+    tipo_cobro VARCHAR2(20) DEFAULT 'POR_EVENTO' NOT NULL,
     activo CHAR(1) DEFAULT 'S' NOT NULL,
     CONSTRAINT uq_complemento_nombre UNIQUE (nombre),
     CONSTRAINT ck_complemento_precio CHECK (precio >= 0),
+    CONSTRAINT ck_complemento_cobro CHECK (tipo_cobro IN ('POR_PERSONA', 'POR_EVENTO')),
     CONSTRAINT ck_complemento_activo CHECK (activo IN ('S', 'N'))
 );
 
@@ -127,6 +131,8 @@ CREATE TABLE PAQUETE (
     nombre VARCHAR2(150) NOT NULL,
     descripcion VARCHAR2(500),
     precio_base NUMBER(10,2) NOT NULL,
+    tipo_paquete VARCHAR2(40) DEFAULT 'SOCIAL' NOT NULL,
+    margen_ganancia NUMBER(5,2) DEFAULT 30 NOT NULL,
     visible_publico CHAR(1) DEFAULT 'S' NOT NULL,
     personalizado CHAR(1) DEFAULT 'N' NOT NULL,
     id_cliente NUMBER,
@@ -134,6 +140,7 @@ CREATE TABLE PAQUETE (
     CONSTRAINT fk_paquete_cliente FOREIGN KEY (id_cliente) REFERENCES CLIENTE(id_cliente),
     CONSTRAINT uq_paquete_nombre_cliente UNIQUE (nombre, id_cliente),
     CONSTRAINT ck_paquete_precio CHECK (precio_base >= 0),
+    CONSTRAINT ck_paquete_margen CHECK (margen_ganancia >= 0),
     CONSTRAINT ck_paquete_visible CHECK (visible_publico IN ('S', 'N')),
     CONSTRAINT ck_paquete_personalizado CHECK (personalizado IN ('S', 'N')),
     CONSTRAINT ck_paquete_activo CHECK (activo IN ('S', 'N')),
@@ -141,6 +148,17 @@ CREATE TABLE PAQUETE (
         personalizado = 'N'
         OR (personalizado = 'S' AND visible_publico = 'N' AND id_cliente IS NOT NULL)
     )
+);
+
+CREATE TABLE PAQUETE_COMPLEMENTO (
+    id_paquete_complemento NUMBER PRIMARY KEY,
+    id_paquete NUMBER NOT NULL,
+    id_complemento NUMBER NOT NULL,
+    cantidad NUMBER DEFAULT 1 NOT NULL,
+    CONSTRAINT fk_pcomp_paquete FOREIGN KEY (id_paquete) REFERENCES PAQUETE(id_paquete),
+    CONSTRAINT fk_pcomp_complemento FOREIGN KEY (id_complemento) REFERENCES COMPLEMENTO(id_complemento),
+    CONSTRAINT uq_pcomp_paquete_complemento UNIQUE (id_paquete, id_complemento),
+    CONSTRAINT ck_pcomp_cantidad CHECK (cantidad > 0)
 );
 
 CREATE TABLE PAQUETE_PLATILLO (
@@ -242,6 +260,19 @@ CREATE TABLE INVITADO_EVENTO (
     CONSTRAINT fk_inv_proyecto FOREIGN KEY (id_proyecto) REFERENCES PROYECTO_EVENTO(id_proyecto),
     CONSTRAINT uq_inv_correo_proyecto UNIQUE (id_proyecto, correo),
     CONSTRAINT ck_inv_estatus CHECK (estatus_confirmacion IN ('PENDIENTE', 'CONFIRMADO', 'RECHAZADO'))
+);
+
+CREATE TABLE CORTESIA_EVENTO (
+    id_cortesia NUMBER PRIMARY KEY,
+    id_proyecto NUMBER NOT NULL,
+    tipo_cortesia VARCHAR2(30) NOT NULL,
+    titulo VARCHAR2(160) NOT NULL,
+    detalle VARCHAR2(800),
+    estatus VARCHAR2(20) DEFAULT 'PENDIENTE' NOT NULL,
+    fecha_registro DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT fk_cortesia_proyecto FOREIGN KEY (id_proyecto) REFERENCES PROYECTO_EVENTO(id_proyecto),
+    CONSTRAINT ck_cortesia_tipo CHECK (tipo_cortesia IN ('AGENDA', 'PENDIENTE', 'MONTAJE', 'MUSICA', 'DIETA')),
+    CONSTRAINT ck_cortesia_estatus CHECK (estatus IN ('PENDIENTE', 'LISTO'))
 );
 
 CREATE TABLE NOTIFICACION (
