@@ -12,29 +12,27 @@ Proyecto final de Sistemas de Base de Datos II. Sistema web con Oracle Database 
 
 ## Instalacion Rapida
 
-1. Ejecuta:
+La forma mas facil es:
 
 ```bat
 instalar.bat
 ```
 
-2. El instalador crea `.venv`, instala dependencias y busca SQLcl con `winget`.
+El instalador no pide conexiones ni contrasenas de Oracle. Usa `sqlplus / as sysdba`, configura `.env`, instala dependencias y reinstala solo el esquema `BANQUETES_CATHERINE`.
 
-3. Si deseas cargar Oracle desde el instalador, responde `S` cuando pregunte por scripts SQL.
+Para instalar y abrir en una sola accion:
 
-4. Para crear el usuario del proyecto, usa una conexion administrativa:
-
-```txt
-sys/TuClave@//127.0.0.1:1521/XEPDB1 as sysdba
+```bat
+abrir_proyecto.bat
 ```
 
-5. Para instalar objetos del proyecto:
+Para reinstalar solo la base de datos demo:
 
-```txt
-BANQUETES_CATHERINE/Catherine2026@//127.0.0.1:1521/XEPDB1
+```bat
+reinstalar_base_datos.bat
 ```
 
-El instalador no borra bases ni usuarios externos. La limpieza de `database/00_drop_schema_objects.sql` solo actua dentro del esquema conectado.
+El instalador no borra bases ni usuarios externos. La limpieza de `database/00_drop_schema_objects.sql` solo actua dentro del esquema `BANQUETES_CATHERINE`.
 
 ## Ejecucion
 
@@ -106,6 +104,14 @@ Scripts principales:
 - `08_demo_transacciones.sql`: pruebas de reglas y transacciones.
 
 ## Flujo De Demostracion
+
+Abre tambien la consola auxiliar en otra ventana:
+
+```txt
+http://127.0.0.1:5000/consola-sql
+```
+
+Esa vista muestra las consultas SQL, procedimientos PL/SQL, parametros seguros, filas devueltas, errores y commits/rollbacks que genera el sitio.
 
 1. Ver catalogos publicos de platillos, complementos y salones.
 2. Crear una solicitud publica.

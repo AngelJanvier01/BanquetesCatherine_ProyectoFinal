@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block titulo %}Consola SQL{% endblock %}
+
+{% block contenido %}
+<section class="consola-pagina">
+    <div class="consola-encabezado">
+        <div>
+            <p class="etiqueta">Monitor de demostracion</p>
+            <h1>Consola SQL</h1>
+        </div>
+        <div class="consola-acciones">
+            <label class="interruptor">
+                <input id="autoActualizar" type="checkbox" checked>
+                <span>Auto</span>
+            </label>
+            <form method="post" action="{{ url_for('limpiar_consola_sql') }}">
+                <button class="boton boton-claro" type="submit">Limpiar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="terminal" id="terminalSql">
+        {% for evento in eventos %}
+            <article class="evento-sql {% if evento.error %}evento-error{% endif %}">
+                <header>
+                    <span>[{{ evento.hora }}]</span>
+                    <strong>{{ evento.accion }}</strong>
+                    <em>{{ evento.tipo }}</em>
+                </header>
+                <pre>{{ evento.sentencia }}</pre>
+                {% if evento.parametros %}
+                    <p><b>Parametros:</b> {{ evento.parametros }}</p>
+                {% endif %}
+                <p>
+                    <b>Resultado:</b>
+                    {% if evento.error %}
+                        {{ evento.resultado }} - {{ evento.error }}
+                    {% else %}
+                        {{ evento.resultado or "OK" }}
+                    {% endif %}
+                    {% if evento.filas is not none %}
+                        - {{ evento.filas }} fila(s)
+                    {% endif %}
+                </p>
+            </article>
+        {% else %}
+            <article class="evento-sql">
+                <header><span>[--:--:--]</span><strong>Sin eventos todavia</strong><em>SISTEMA</em></header>
+                <pre>-- Navega por el sitio para ver las consultas SQL y procedimientos PL/SQL ejecutados.</pre>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+

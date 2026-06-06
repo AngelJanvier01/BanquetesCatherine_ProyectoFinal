@@ -9,3 +9,5 @@
 @@06_datos_prueba.sql
 
 SELECT 'Instalacion de Banquetes Catherine completada' AS resultado FROM dual;
+
+EXIT SUCCESS

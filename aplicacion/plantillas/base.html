@@ -13,6 +13,7 @@
             <a href="{{ url_for('inicio') }}#platillos">Platillos</a>
             <a href="{{ url_for('inicio') }}#salones">Salones</a>
             <a href="{{ url_for('inicio') }}#solicitud">Solicitud</a>
+            <a href="{{ url_for('consola_sql') }}" target="_blank">Consola SQL</a>
             {% if session.get("rol") == "CLIENTE" %}
                 <a href="{{ url_for('panel_cliente') }}">Mi panel</a>
             {% elif session.get("rol") in ["GERENTE", "GERENTE_ADMIN"] %}
@@ -48,4 +49,3 @@
     <script src="{{ url_for('static', filename='js/app.js') }}"></script>
 </body>
 </html>
-

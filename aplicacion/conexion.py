@@ -4,6 +4,11 @@ from contextlib import contextmanager
 import oracledb
 from dotenv import load_dotenv
 
+try:
+    from .monitor_sql import registrar_evento_sql
+except ImportError:
+    from monitor_sql import registrar_evento_sql
+
 
 load_dotenv()
 
@@ -62,15 +67,64 @@ def filas_como_diccionarios(cursor):
     return [dict(zip(columnas, fila)) for fila in cursor.fetchall()]
 
 
-def consultar(sql, parametros=None):
+def consultar(sql, parametros=None, accion="Consulta SQL"):
     with abrir_conexion() as conexion:
         with conexion.cursor() as cursor:
-            cursor.execute(sql, parametros or {})
-            return filas_como_diccionarios(cursor)
+            try:
+                cursor.execute(sql, parametros or {})
+                filas = filas_como_diccionarios(cursor)
+                registrar_evento_sql(
+                    accion=accion,
+                    sentencia=sql,
+                    parametros=parametros,
+                    filas=len(filas),
+                    resultado=f"{len(filas)} fila(s) consultada(s)",
+                )
+                return filas
+            except Exception as error:
+                registrar_evento_sql(
+                    accion=accion,
+                    sentencia=sql,
+                    parametros=parametros,
+                    error=error,
+                    resultado="Error en consulta",
+                )
+                raise
 
 
-def ejecutar(sql, parametros=None):
+def ejecutar(sql, parametros=None, accion="Ejecucion SQL"):
     with abrir_conexion() as conexion:
         with conexion.cursor() as cursor:
-            cursor.execute(sql, parametros or {})
+            try:
+                cursor.execute(sql, parametros or {})
+                filas_afectadas = cursor.rowcount
+                registrar_evento_sql(
+                    accion=accion,
+                    sentencia=sql,
+                    parametros=parametros,
+                    filas=filas_afectadas,
+                    resultado=f"{filas_afectadas} fila(s) afectada(s); COMMIT",
+                )
+            except Exception as error:
+                registrar_evento_sql(
+                    accion=accion,
+                    sentencia=sql,
+                    parametros=parametros,
+                    error=error,
+                    resultado="Error; ROLLBACK",
+                )
+                raise
         conexion.commit()
+
+
+def registrar_procedimiento(accion, nombre_procedimiento, parametros=None, resultado=None, error=None):
+    nombres = ", ".join([f":p{i + 1}" for i in range(len(parametros or []))])
+    sentencia = f"BEGIN {nombre_procedimiento}({nombres}); END;"
+    registrar_evento_sql(
+        accion=accion,
+        sentencia=sentencia,
+        parametros=parametros,
+        resultado=resultado,
+        error=error,
+        tipo="PL/SQL",
+    )

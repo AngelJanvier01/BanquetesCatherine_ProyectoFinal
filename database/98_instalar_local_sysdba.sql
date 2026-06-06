@@ -2,6 +2,13 @@
 -- Ejecutar con: sqlplus / as sysdba @98_instalar_local_sysdba.sql
 -- Sirve cuando Oracle XE en Windows marca ORA-12518 por el listener.
 
+WHENEVER OSERROR EXIT FAILURE
+WHENEVER SQLERROR EXIT SQL.SQLCODE
+
+SET ECHO OFF
+SET FEEDBACK ON
+SET HEADING ON
+
 ALTER SESSION SET CONTAINER = XEPDB1;
 
 @@01_crear_usuario_opcional.sql
@@ -16,3 +23,5 @@ ALTER SESSION SET CURRENT_SCHEMA = BANQUETES_CATHERINE;
 @@06_datos_prueba.sql
 
 SELECT 'Instalacion local SYSDBA completada en BANQUETES_CATHERINE' AS resultado FROM dual;
+
+EXIT SUCCESS
