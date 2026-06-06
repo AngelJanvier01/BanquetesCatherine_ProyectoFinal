@@ -7,6 +7,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+cliente_oracle_iniciado = False
+
+
+def usar_sysdba_local():
+    return os.getenv("ORACLE_USAR_SYSDBA_LOCAL", "N").upper() == "S"
+
+
+def iniciar_cliente_oracle():
+    global cliente_oracle_iniciado
+    if cliente_oracle_iniciado:
+        return
+    carpeta_cliente = os.getenv("ORACLE_CLIENT_LIB_DIR", r"C:\app\ANGEL\product\21c\dbhomeXE\bin")
+    try:
+        oracledb.init_oracle_client(lib_dir=carpeta_cliente)
+    except oracledb.ProgrammingError:
+        pass
+    cliente_oracle_iniciado = True
+
 
 def obtener_dsn():
     dsn_directo = os.getenv("ORACLE_DSN")
@@ -21,11 +39,18 @@ def obtener_dsn():
 
 @contextmanager
 def abrir_conexion():
-    conexion = oracledb.connect(
-        user=os.getenv("ORACLE_USER", "BANQUETES_CATHERINE"),
-        password=os.getenv("ORACLE_PASSWORD", "Catherine2026"),
-        dsn=obtener_dsn(),
-    )
+    if usar_sysdba_local():
+        iniciar_cliente_oracle()
+        conexion = oracledb.connect(mode=oracledb.AUTH_MODE_SYSDBA)
+        with conexion.cursor() as cursor:
+            cursor.execute(f"ALTER SESSION SET CONTAINER = {os.getenv('ORACLE_SERVICE', 'XEPDB1')}")
+            cursor.execute(f"ALTER SESSION SET CURRENT_SCHEMA = {os.getenv('ORACLE_USER', 'BANQUETES_CATHERINE')}")
+    else:
+        conexion = oracledb.connect(
+            user=os.getenv("ORACLE_USER", "BANQUETES_CATHERINE"),
+            password=os.getenv("ORACLE_PASSWORD", "Catherine2026"),
+            dsn=obtener_dsn(),
+        )
     try:
         yield conexion
     finally:
@@ -49,4 +74,3 @@ def ejecutar(sql, parametros=None):
         with conexion.cursor() as cursor:
             cursor.execute(sql, parametros or {})
         conexion.commit()
-

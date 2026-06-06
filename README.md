@@ -60,6 +60,20 @@ ORACLE_PORT=1521
 ORACLE_SERVICE=XEPDB1
 ORACLE_USER=BANQUETES_CATHERINE
 ORACLE_PASSWORD=Catherine2026
+ORACLE_USAR_SYSDBA_LOCAL=N
+ORACLE_CLIENT_LIB_DIR=C:\app\ANGEL\product\21c\dbhomeXE\bin
+```
+
+Si Oracle XE en Windows marca `ORA-12518` o `TNS-00534` al conectarse por listener, se puede usar el modo local de emergencia:
+
+```txt
+ORACLE_USAR_SYSDBA_LOCAL=S
+```
+
+Y cargar la base sin listener con:
+
+```bat
+sqlplus / as sysdba @database/98_instalar_local_sysdba.sql
 ```
 
 ## Usuarios Demo
