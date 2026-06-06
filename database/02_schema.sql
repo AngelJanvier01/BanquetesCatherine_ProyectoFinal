@@ -9,7 +9,7 @@ CREATE TABLE USUARIO (
     activo CHAR(1) DEFAULT 'S' NOT NULL,
     fecha_creacion DATE DEFAULT SYSDATE NOT NULL,
     CONSTRAINT uq_usuario_nombre UNIQUE (nombre_usuario),
-    CONSTRAINT ck_usuario_rol CHECK (rol IN ('CLIENTE', 'GERENTE', 'GERENTE_ADMIN')),
+    CONSTRAINT ck_usuario_rol CHECK (rol IN ('CLIENTE', 'GERENTE', 'GERENTE_ADMIN', 'CHEF')),
     CONSTRAINT ck_usuario_activo CHECK (activo IN ('S', 'N'))
 );
 
@@ -45,13 +45,17 @@ CREATE TABLE PLATILLO (
     nombre VARCHAR2(120) NOT NULL,
     descripcion VARCHAR2(500),
     precio NUMBER(10,2) NOT NULL,
+    costo_estimado NUMBER(10,2) DEFAULT 0 NOT NULL,
     porciones_base NUMBER DEFAULT 4 NOT NULL,
     categoria VARCHAR2(60),
     tipo_dieta VARCHAR2(60),
+    dificultad VARCHAR2(20) DEFAULT 'MEDIA' NOT NULL,
     activo CHAR(1) DEFAULT 'S' NOT NULL,
     CONSTRAINT uq_platillo_nombre UNIQUE (nombre),
     CONSTRAINT ck_platillo_precio CHECK (precio >= 0),
+    CONSTRAINT ck_platillo_costo CHECK (costo_estimado >= 0),
     CONSTRAINT ck_platillo_porciones CHECK (porciones_base > 0),
+    CONSTRAINT ck_platillo_dificultad CHECK (dificultad IN ('BAJA', 'MEDIA', 'ALTA')),
     CONSTRAINT ck_platillo_activo CHECK (activo IN ('S', 'N'))
 );
 
@@ -101,6 +105,9 @@ CREATE TABLE SALON (
     id_salon NUMBER PRIMARY KEY,
     nombre VARCHAR2(150) NOT NULL,
     direccion VARCHAR2(250) NOT NULL,
+    zona VARCHAR2(120),
+    descripcion VARCHAR2(700),
+    foto_url VARCHAR2(250),
     convenio_activo CHAR(1) DEFAULT 'S' NOT NULL,
     costo_renta NUMBER(10,2) NOT NULL,
     capacidad_maxima NUMBER NOT NULL,
@@ -221,6 +228,20 @@ CREATE TABLE PAGO (
     CONSTRAINT ck_pago_monto CHECK (monto > 0),
     CONSTRAINT ck_pago_tipo CHECK (tipo_pago IN ('ANTICIPO', 'ABONO', 'LIQUIDACION', 'AJUSTE')),
     CONSTRAINT uq_pago_referencia UNIQUE (referencia)
+);
+
+CREATE TABLE INVITADO_EVENTO (
+    id_invitado NUMBER PRIMARY KEY,
+    id_proyecto NUMBER NOT NULL,
+    nombre VARCHAR2(160) NOT NULL,
+    correo VARCHAR2(120),
+    telefono VARCHAR2(30),
+    estatus_confirmacion VARCHAR2(20) DEFAULT 'PENDIENTE' NOT NULL,
+    fecha_invitacion DATE DEFAULT SYSDATE NOT NULL,
+    fecha_respuesta DATE,
+    CONSTRAINT fk_inv_proyecto FOREIGN KEY (id_proyecto) REFERENCES PROYECTO_EVENTO(id_proyecto),
+    CONSTRAINT uq_inv_correo_proyecto UNIQUE (id_proyecto, correo),
+    CONSTRAINT ck_inv_estatus CHECK (estatus_confirmacion IN ('PENDIENTE', 'CONFIRMADO', 'RECHAZADO'))
 );
 
 CREATE TABLE NOTIFICACION (

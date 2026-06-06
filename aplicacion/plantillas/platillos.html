@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block titulo %}Platillos{% endblock %}
+
+{% block contenido %}
+<section class="seccion contenedor">
+    <div class="encabezado-seccion">
+        <div>
+            <p class="etiqueta">Catalogo publico</p>
+            <h1>Platillos</h1>
+            <p>Precios, dificultad y datos utiles para planear paquetes de banquete.</p>
+        </div>
+        <button class="boton boton-oscuro abrir-agenda" type="button">Agendar</button>
+    </div>
+    <div class="rejilla tarjetas">
+        {% for platillo in platillos %}
+            <article class="tarjeta tarjeta-catalogo">
+                <div class="tarjeta-cabecera">
+                    <span class="pildora">{{ platillo.categoria }}</span>
+                    <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
+                </div>
+                <h3>{{ platillo.nombre }}</h3>
+                <p>{{ platillo.descripcion }}</p>
+                <dl class="datos-mini">
+                    <div><dt>Costo</dt><dd>${{ "%.2f"|format(platillo.costo_estimado) }}</dd></div>
+                    <div><dt>Dificultad</dt><dd>{{ platillo.dificultad }}</dd></div>
+                    <div><dt>Porciones</dt><dd>{{ platillo.porciones_base }}</dd></div>
+                    <div><dt>Ingredientes</dt><dd>{{ platillo.numero_ingredientes }}</dd></div>
+                </dl>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

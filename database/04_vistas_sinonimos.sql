@@ -2,15 +2,22 @@
 
 CREATE OR REPLACE VIEW vw_platillos_publicos AS
 SELECT
-    id_platillo,
-    INITCAP(nombre) AS nombre,
-    descripcion,
-    precio,
-    porciones_base,
-    categoria,
-    tipo_dieta
-FROM PLATILLO
-WHERE activo = 'S';
+    pl.id_platillo,
+    INITCAP(pl.nombre) AS nombre,
+    pl.descripcion,
+    pl.precio,
+    pl.costo_estimado,
+    pl.porciones_base,
+    pl.categoria,
+    pl.tipo_dieta,
+    pl.dificultad,
+    (
+        SELECT COUNT(1)
+        FROM PLATILLO_INGREDIENTE pi
+        WHERE pi.id_platillo = pl.id_platillo
+    ) AS numero_ingredientes
+FROM PLATILLO pl
+WHERE pl.activo = 'S';
 
 CREATE OR REPLACE VIEW vw_complementos_publicos AS
 SELECT
@@ -26,6 +33,9 @@ SELECT
     id_salon,
     INITCAP(nombre) AS nombre,
     direccion,
+    zona,
+    descripcion,
+    foto_url,
     costo_renta,
     capacidad_maxima,
     contacto_instalacion,
@@ -78,6 +88,9 @@ SELECT
     pe.fecha_evento,
     pe.numero_invitados,
     s.nombre AS salon,
+    s.direccion AS direccion_salon,
+    s.contacto_instalacion,
+    s.telefono_contacto,
     p.nombre AS paquete,
     pe.estatus,
     ep.total_estimado,
@@ -104,7 +117,9 @@ SELECT
     ss.fecha_evento,
     ss.numero_invitados,
     NVL(s.nombre, 'SIN PREFERENCIA') AS salon_preferido,
+    ss.id_salon_preferido,
     NVL(p.nombre, 'SIN PREFERENCIA') AS paquete_preferido,
+    ss.id_paquete_preferido,
     ss.mensaje,
     ss.estatus,
     ss.fecha_solicitud,
@@ -220,9 +235,45 @@ GROUP BY
     ep.total_pagado,
     ep.saldo_pendiente;
 
+CREATE OR REPLACE VIEW vw_invitados_proyecto AS
+SELECT
+    inv.id_invitado,
+    inv.id_proyecto,
+    inv.nombre,
+    inv.correo,
+    inv.telefono,
+    inv.estatus_confirmacion,
+    inv.fecha_invitacion,
+    inv.fecha_respuesta,
+    pe.id_cliente
+FROM INVITADO_EVENTO inv
+INNER JOIN PROYECTO_EVENTO pe ON pe.id_proyecto = inv.id_proyecto;
+
+CREATE OR REPLACE VIEW vw_recetas_chef AS
+SELECT
+    pl.id_platillo,
+    pl.nombre AS platillo,
+    pl.categoria,
+    pl.precio,
+    pl.costo_estimado,
+    pl.dificultad,
+    pl.porciones_base,
+    i.id_ingrediente,
+    i.nombre_ingrediente,
+    i.unidad_medida,
+    pi.cantidad,
+    inst.numero_paso,
+    inst.instruccion
+FROM PLATILLO pl
+LEFT JOIN PLATILLO_INGREDIENTE pi ON pi.id_platillo = pl.id_platillo
+LEFT JOIN INGREDIENTE i ON i.id_ingrediente = pi.id_ingrediente
+LEFT JOIN INSTRUCCION inst ON inst.id_platillo = pl.id_platillo
+WHERE pl.activo = 'S';
+
 -- Sinonimos privados para evidenciar el tema y facilitar consultas en demo.
 CREATE OR REPLACE SYNONYM cat_platillos FOR vw_platillos_publicos;
 CREATE OR REPLACE SYNONYM cat_complementos FOR vw_complementos_publicos;
 CREATE OR REPLACE SYNONYM cat_salones FOR vw_salones_publicos;
 CREATE OR REPLACE SYNONYM rep_cobranza FOR vw_eventos_no_finiquitados_21;
 CREATE OR REPLACE SYNONYM rep_popularidad FOR vw_popularidad_platillos;
+CREATE OR REPLACE SYNONYM rep_recetas FOR vw_recetas_chef;

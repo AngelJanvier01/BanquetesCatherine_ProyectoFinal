@@ -18,6 +18,22 @@ function escaparHtml(valor) {
         .replaceAll("'", "&#039;");
 }
 
+function pintarTablaResultado(muestra) {
+    if (!Array.isArray(muestra) || !muestra.length) return "";
+    const columnas = Object.keys(muestra[0]);
+    return `
+        <div class="resultado-sql">
+            <table>
+                <thead><tr>${columnas.map((columna) => `<th>${escaparHtml(columna)}</th>`).join("")}</tr></thead>
+                <tbody>
+                    ${muestra.map((fila) => `
+                        <tr>${columnas.map((columna) => `<td>${escaparHtml(fila[columna])}</td>`).join("")}</tr>
+                    `).join("")}
+                </tbody>
+            </table>
+        </div>`;
+}
+
 function pintarEventosSql(eventos) {
     if (!terminalSql) return;
     if (!eventos.length) {
@@ -43,6 +59,7 @@ function pintarEventosSql(eventos) {
                 ${evento.error ? ` - ${escaparHtml(evento.error)}` : ""}
                 ${evento.filas !== null && evento.filas !== undefined ? ` - ${escaparHtml(evento.filas)} fila(s)` : ""}
             </p>
+            ${pintarTablaResultado(evento.muestra)}
         </article>`).join("");
     terminalSql.scrollTop = terminalSql.scrollHeight;
 }
@@ -58,3 +75,51 @@ if (terminalSql) {
     terminalSql.scrollTop = terminalSql.scrollHeight;
     setInterval(actualizarConsolaSql, 1800);
 }
+
+const modalAgenda = document.getElementById("modalAgenda");
+let opcionesAgendaCargadas = false;
+
+async function cargarOpcionesAgenda() {
+    if (opcionesAgendaCargadas) return;
+    const respuesta = await fetch("/api/opciones-solicitud", { cache: "no-store" });
+    if (!respuesta.ok) return;
+    const datos = await respuesta.json();
+    const salones = document.querySelectorAll("[data-opciones-salones]");
+    const paquetes = document.querySelectorAll("[data-opciones-paquetes]");
+    salones.forEach((select) => {
+        select.innerHTML = `<option value="">Sin preferencia</option>` + (datos.salones || []).map((salon) =>
+            `<option value="${escaparHtml(salon.id_salon)}">${escaparHtml(salon.nombre)} · ${escaparHtml(salon.capacidad_maxima)} personas</option>`
+        ).join("");
+    });
+    paquetes.forEach((select) => {
+        select.innerHTML = `<option value="">Sin preferencia</option>` + (datos.paquetes || []).map((paquete) =>
+            `<option value="${escaparHtml(paquete.id_paquete)}">${escaparHtml(paquete.nombre)} · $${escaparHtml(paquete.precio_base)}</option>`
+        ).join("");
+    });
+    opcionesAgendaCargadas = true;
+}
+
+function abrirAgenda() {
+    if (!modalAgenda) return;
+    cargarOpcionesAgenda();
+    modalAgenda.classList.add("abierto");
+    modalAgenda.setAttribute("aria-hidden", "false");
+}
+
+function cerrarAgenda() {
+    if (!modalAgenda) return;
+    modalAgenda.classList.remove("abierto");
+    modalAgenda.setAttribute("aria-hidden", "true");
+}
+
+document.querySelectorAll(".abrir-agenda").forEach((boton) => {
+    boton.addEventListener("click", abrirAgenda);
+});
+
+document.querySelectorAll("[data-cerrar-agenda]").forEach((elemento) => {
+    elemento.addEventListener("click", cerrarAgenda);
+});
+
+document.addEventListener("keydown", (evento) => {
+    if (evento.key === "Escape") cerrarAgenda();
+});

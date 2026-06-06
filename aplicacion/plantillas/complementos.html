@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Complementos{% endblock %}
+
+{% block contenido %}
+<section class="seccion contenedor">
+    <div class="encabezado-seccion">
+        <div>
+            <p class="etiqueta">Extras del servicio</p>
+            <h1>Complementos</h1>
+            <p>Opciones para ajustar montaje, bebidas, loza, postres y servicio adicional.</p>
+        </div>
+        <button class="boton boton-oscuro abrir-agenda" type="button">Agendar</button>
+    </div>
+    <div class="lista-precios lista-precios-grande">
+        {% for complemento in complementos %}
+            <div>
+                <span>
+                    <strong>{{ complemento.nombre }}</strong>
+                    <small>{{ complemento.descripcion }}</small>
+                </span>
+                <strong>${{ "%.2f"|format(complemento.precio) }}</strong>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

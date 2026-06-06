@@ -4,60 +4,120 @@
 {% block contenido %}
 <section class="contenedor seccion">
     <div class="encabezado-seccion">
-        <h1>Panel cliente</h1>
-        <p>Proyectos activos y paquetes disponibles.</p>
+        <div>
+            <p class="etiqueta">Portal cliente</p>
+            <h1>Mis eventos</h1>
+            <p>Solicitudes, proyectos activos, costos, ubicacion e invitados.</p>
+        </div>
+        <button class="boton boton-oscuro abrir-agenda" type="button">Nueva solicitud</button>
     </div>
 
-    <div class="tabla-contenedor">
-        <table>
-            <thead>
-                <tr>
-                    <th>Evento</th>
-                    <th>Fecha</th>
-                    <th>Salon</th>
-                    <th>Paquete</th>
-                    <th>Invitados</th>
-                    <th>Saldo</th>
-                    <th>Cambio</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for proyecto in proyectos %}
+    <section class="bloque">
+        <h2>Solicitudes enviadas</h2>
+        <div class="rejilla tarjetas">
+            {% for solicitud in solicitudes %}
+                <article class="tarjeta">
+                    <span class="pildora">{{ solicitud.estatus }}</span>
+                    <h3>Folio {{ solicitud.id_solicitud }}</h3>
+                    <p>{{ solicitud.fecha_evento.strftime("%Y-%m-%d") if solicitud.fecha_evento else "" }} · {{ solicitud.numero_invitados }} invitados</p>
+                    <p>{{ solicitud.salon_preferido }} / {{ solicitud.paquete_preferido }}</p>
+                    {% if solicitud.estatus == "PENDIENTE" %}
+                        <form class="formulario formulario-simple" method="post" action="{{ url_for('actualizar_solicitud_cliente', id_solicitud=solicitud.id_solicitud) }}">
+                            <input name="fecha_evento" type="date" value="{{ solicitud.fecha_evento.strftime('%Y-%m-%d') if solicitud.fecha_evento else '' }}" required>
+                            <input name="numero_invitados" type="number" min="1" value="{{ solicitud.numero_invitados }}" required>
+                            <select name="id_salon_preferido">
+                                <option value="">Sin preferencia</option>
+                                {% for salon in opciones.salones %}
+                                    <option value="{{ salon.id_salon }}" {% if salon.id_salon == solicitud.id_salon_preferido %}selected{% endif %}>{{ salon.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <select name="id_paquete_preferido">
+                                <option value="">Sin preferencia</option>
+                                {% for paquete in opciones.paquetes %}
+                                    <option value="{{ paquete.id_paquete }}" {% if paquete.id_paquete == solicitud.id_paquete_preferido %}selected{% endif %}>{{ paquete.nombre }}</option>
+                                {% endfor %}
+                            </select>
+                            <textarea name="mensaje" rows="2">{{ solicitud.mensaje or "" }}</textarea>
+                            <button class="boton boton-chico" type="submit">Actualizar solicitud</button>
+                        </form>
+                    {% endif %}
+                </article>
+            {% else %}
+                <article class="tarjeta"><p>No tienes solicitudes registradas con este correo.</p></article>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="bloque">
+        <h2>Proyectos activos</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
                     <tr>
-                        <td>{{ proyecto.nombre_evento }}</td>
-                        <td>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }}</td>
-                        <td>{{ proyecto.salon }}</td>
-                        <td>{{ proyecto.paquete }}</td>
-                        <td>{{ proyecto.numero_invitados }}</td>
-                        <td>${{ "%.2f"|format(proyecto.saldo_pendiente) }}</td>
-                        <td>
-                            {% if proyecto.puede_cambiar_invitados == "S" %}
-                                <form class="formulario-linea" method="post" action="{{ url_for('actualizar_invitados', id_proyecto=proyecto.id_proyecto) }}">
-                                    <input name="numero_invitados" type="number" min="1" value="{{ proyecto.numero_invitados }}" required>
-                                    <button class="boton boton-chico" type="submit">Guardar</button>
-                                </form>
-                            {% else %}
-                                <span class="pildora alerta">Bloqueado</span>
-                            {% endif %}
-                        </td>
+                        <th>Evento</th>
+                        <th>Fecha</th>
+                        <th>Salon</th>
+                        <th>Costos</th>
+                        <th>Invitados</th>
+                        <th>Cambio</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    {% for proyecto in proyectos %}
+                        <tr>
+                            <td>{{ proyecto.nombre_evento }}<br><span>{{ proyecto.paquete }}</span></td>
+                            <td>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }}</td>
+                            <td>{{ proyecto.salon }}<br><span>{{ proyecto.direccion_salon }}</span></td>
+                            <td>Total ${{ "%.2f"|format(proyecto.total_estimado) }}<br><span>Pagado ${{ "%.2f"|format(proyecto.total_pagado) }} · saldo ${{ "%.2f"|format(proyecto.saldo_pendiente) }}</span></td>
+                            <td>{{ proyecto.numero_invitados }}</td>
+                            <td>
+                                {% if proyecto.puede_cambiar_invitados == "S" %}
+                                    <form class="formulario-linea" method="post" action="{{ url_for('actualizar_invitados', id_proyecto=proyecto.id_proyecto) }}">
+                                        <input name="numero_invitados" type="number" min="1" value="{{ proyecto.numero_invitados }}" required>
+                                        <button class="boton boton-chico" type="submit">Guardar</button>
+                                    </form>
+                                {% else %}
+                                    <span class="pildora alerta">Bloqueado</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="6">No tienes proyectos activos.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
 
     <div class="dos-columnas">
         <section>
-            <h2>Paquetes visibles para ti</h2>
-            <div class="lista-precios">
-                {% for paquete in paquetes %}
-                    <div>
-                        <span>{{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}</span>
-                        <strong>${{ "%.2f"|format(paquete.precio_base) }}</strong>
+            <h2>Gestion de invitados</h2>
+            {% for proyecto in proyectos %}
+                <article class="tarjeta bloque">
+                    <h3>{{ proyecto.nombre_evento }}</h3>
+                    <form class="formulario formulario-simple" method="post" action="{{ url_for('registrar_invitado_evento', id_proyecto=proyecto.id_proyecto) }}">
+                        <input name="nombre" placeholder="Nombre invitado" required>
+                        <input name="correo" type="email" placeholder="Correo">
+                        <input name="telefono" placeholder="Telefono">
+                        <button class="boton boton-chico" type="submit">Simular envio</button>
+                    </form>
+                    <div class="lista-invitados">
+                        {% for invitado in invitados if invitado.id_proyecto == proyecto.id_proyecto %}
+                            <form class="formulario-linea" method="post" action="{{ url_for('confirmar_invitado_evento', id_invitado=invitado.id_invitado) }}">
+                                <span>{{ invitado.nombre }} · {{ invitado.estatus_confirmacion }}</span>
+                                <select name="estatus_confirmacion">
+                                    <option {% if invitado.estatus_confirmacion == "PENDIENTE" %}selected{% endif %}>PENDIENTE</option>
+                                    <option {% if invitado.estatus_confirmacion == "CONFIRMADO" %}selected{% endif %}>CONFIRMADO</option>
+                                    <option {% if invitado.estatus_confirmacion == "RECHAZADO" %}selected{% endif %}>RECHAZADO</option>
+                                </select>
+                                <button class="boton boton-chico" type="submit">Confirmar</button>
+                            </form>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-            </div>
+                </article>
+            {% endfor %}
         </section>
+
         <section>
             <h2>Notificaciones</h2>
             <div class="notificaciones">
@@ -70,8 +130,17 @@
                     <p class="texto-suave">Sin notificaciones.</p>
                 {% endfor %}
             </div>
+
+            <h2>Paquetes visibles</h2>
+            <div class="lista-precios">
+                {% for paquete in paquetes %}
+                    <div>
+                        <span>{{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}</span>
+                        <strong>${{ "%.2f"|format(paquete.precio_base) }}</strong>
+                    </div>
+                {% endfor %}
+            </div>
         </section>
     </div>
 </section>
 {% endblock %}
-

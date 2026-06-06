@@ -79,6 +79,7 @@ def consultar(sql, parametros=None, accion="Consulta SQL"):
                     parametros=parametros,
                     filas=len(filas),
                     resultado=f"{len(filas)} fila(s) consultada(s)",
+                    muestra=filas[:10],
                 )
                 return filas
             except Exception as error:

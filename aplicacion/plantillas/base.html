@@ -8,17 +8,23 @@
 </head>
 <body>
     <header class="barra">
-        <a class="marca" href="{{ url_for('inicio') }}">Banquetes Catherine</a>
+        <a class="marca" href="{{ url_for('inicio') }}">
+            <span>Banquetes Catherine</span>
+            <small>Zacatecas</small>
+        </a>
         <nav class="navegacion">
-            <a href="{{ url_for('inicio') }}#platillos">Platillos</a>
-            <a href="{{ url_for('inicio') }}#salones">Salones</a>
-            <a href="{{ url_for('inicio') }}#solicitud">Solicitud</a>
+            <a href="{{ url_for('platillos_publicos') }}">Platillos</a>
+            <a href="{{ url_for('complementos_publicos') }}">Complementos</a>
+            <a href="{{ url_for('salones_publicos') }}">Salones</a>
+            <button class="enlace-nav abrir-agenda" type="button">Agendar</button>
             <a href="{{ url_for('consola_sql') }}" target="_blank">Consola SQL</a>
             {% if session.get("rol") == "CLIENTE" %}
                 <a href="{{ url_for('panel_cliente') }}">Mi panel</a>
             {% elif session.get("rol") in ["GERENTE", "GERENTE_ADMIN"] %}
                 <a href="{{ url_for('panel_gerente') }}">Gerencia</a>
                 <a href="{{ url_for('reportes') }}">Reportes</a>
+            {% elif session.get("rol") == "CHEF" %}
+                <a href="{{ url_for('panel_chef') }}">Cocina</a>
             {% endif %}
             {% if session.get("id_usuario") %}
                 <a href="{{ url_for('salir') }}">Salir</a>
@@ -41,6 +47,51 @@
     <main>
         {% block contenido %}{% endblock %}
     </main>
+
+    <div class="modal-agenda" id="modalAgenda" aria-hidden="true">
+        <div class="modal-fondo" data-cerrar-agenda></div>
+        <section class="modal-contenido" role="dialog" aria-modal="true" aria-labelledby="tituloAgenda">
+            <button class="modal-cerrar" type="button" data-cerrar-agenda aria-label="Cerrar">x</button>
+            <div class="encabezado-seccion">
+                <div>
+                    <p class="etiqueta">Solicitud publica</p>
+                    <h2 id="tituloAgenda">Agendar servicio</h2>
+                </div>
+                <p>La solicitud queda pendiente hasta que gerencia confirme salon y registre anticipo.</p>
+            </div>
+            <form class="formulario formulario-modal" method="post" action="{{ url_for('crear_solicitud') }}">
+                <label>Nombre contacto
+                    <input name="nombre_contacto" required maxlength="160">
+                </label>
+                <label>Correo
+                    <input name="correo" type="email" required maxlength="120">
+                </label>
+                <label>Telefono
+                    <input name="telefono" maxlength="30">
+                </label>
+                <label>Fecha evento
+                    <input name="fecha_evento" type="date" required>
+                </label>
+                <label>Invitados
+                    <input name="numero_invitados" type="number" min="1" required>
+                </label>
+                <label>Salon preferido
+                    <select name="id_salon_preferido" data-opciones-salones>
+                        <option value="">Sin preferencia</option>
+                    </select>
+                </label>
+                <label>Paquete preferido
+                    <select name="id_paquete_preferido" data-opciones-paquetes>
+                        <option value="">Sin preferencia</option>
+                    </select>
+                </label>
+                <label class="ancho-total">Mensaje
+                    <textarea name="mensaje" rows="4" maxlength="1000"></textarea>
+                </label>
+                <button class="boton boton-oscuro" type="submit">Enviar solicitud</button>
+            </form>
+        </section>
+    </div>
 
     <footer class="pie">
         <span>Proyecto final Base de Datos II</span>

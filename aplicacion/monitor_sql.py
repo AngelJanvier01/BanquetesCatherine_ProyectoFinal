@@ -19,14 +19,18 @@ def ruta_log_sql():
 def valor_seguro(valor):
     if valor is None:
         return None
-    if isinstance(valor, (int, float, str, bool)):
-        texto = str(valor)
-    elif isinstance(valor, Decimal):
-        texto = str(valor)
+    if isinstance(valor, Decimal):
+        return float(valor)
     elif isinstance(valor, datetime):
-        texto = valor.strftime("%Y-%m-%d %H:%M:%S")
+        return valor.strftime("%Y-%m-%d %H:%M:%S")
     elif hasattr(valor, "getvalue"):
-        texto = "<parametro_salida>"
+        return "<parametro_salida>"
+    elif isinstance(valor, dict):
+        return {clave: valor_seguro(item) for clave, item in valor.items()}
+    elif isinstance(valor, (list, tuple)):
+        return [valor_seguro(item) for item in valor]
+    elif isinstance(valor, (int, float, str, bool)):
+        texto = str(valor)
     else:
         texto = str(valor)
 
@@ -43,11 +47,26 @@ def parametros_seguros(parametros):
     return [valor_seguro(valor) for valor in parametros]
 
 
+def muestra_segura(muestra):
+    if not muestra:
+        return []
+    filas = []
+    for fila in muestra:
+        if isinstance(fila, dict):
+            filas.append({
+                clave: "***" if "contrasena" in clave.lower() or "password" in clave.lower() or "hash" in clave.lower() else valor_seguro(valor)
+                for clave, valor in fila.items()
+            })
+        else:
+            filas.append(valor_seguro(fila))
+    return filas
+
+
 def limpiar_sql(sql):
     return " ".join(str(sql).strip().split())
 
 
-def registrar_evento_sql(accion, sentencia, parametros=None, filas=None, resultado=None, error=None, tipo="SQL"):
+def registrar_evento_sql(accion, sentencia, parametros=None, filas=None, resultado=None, error=None, tipo="SQL", muestra=None):
     evento = {
         "hora": datetime.now().strftime("%H:%M:%S"),
         "fecha": datetime.now().strftime("%Y-%m-%d"),
@@ -58,6 +77,7 @@ def registrar_evento_sql(accion, sentencia, parametros=None, filas=None, resulta
         "filas": filas,
         "resultado": resultado,
         "error": str(error) if error else None,
+        "muestra": muestra_segura(muestra),
     }
 
     with _bloqueo:
@@ -89,4 +109,3 @@ def limpiar_eventos_sql():
     with _bloqueo:
         with open(ruta, "w", encoding="utf-8") as archivo:
             archivo.write("")
-

@@ -7,6 +7,19 @@ FROM PLATILLO
 WHERE activo = 'S'
 ORDER BY precio DESC;
 
+-- Catalogo de salones locales con datos de instalacion.
+SELECT nombre, zona, capacidad_maxima, costo_renta, contacto_instalacion, foto_url
+FROM SALON
+WHERE convenio_activo = 'S'
+ORDER BY capacidad_maxima;
+
+-- Usuarios por rol, incluyendo CHEF.
+SELECT rol, COUNT(*) AS total_usuarios
+FROM USUARIO
+WHERE activo = 'S'
+GROUP BY rol
+ORDER BY rol;
+
 -- Funciones Oracle de String.
 SELECT
     UPPER(nombre) AS nombre_mayusculas,
@@ -34,6 +47,12 @@ SELECT
     CEIL(numero_invitados / 10) AS mesas_estimadas
 FROM PROYECTO_EVENTO
 WHERE estatus = 'ACTIVO';
+
+-- Invitados y confirmaciones por proyecto.
+SELECT pe.nombre_evento, inv.nombre, inv.correo, inv.estatus_confirmacion
+FROM INVITADO_EVENTO inv
+INNER JOIN PROYECTO_EVENTO pe ON pe.id_proyecto = inv.id_proyecto
+ORDER BY pe.nombre_evento, inv.nombre;
 
 -- INNER JOIN.
 SELECT pe.nombre_evento, c.nombre || ' ' || c.apellido AS cliente, s.nombre AS salon
@@ -89,6 +108,12 @@ SELECT
 FROM PROYECTO_EVENTO
 WHERE ROWNUM <= 5;
 
+-- Vista de recetas para el chef.
+SELECT platillo, dificultad, costo_estimado, nombre_ingrediente, cantidad, unidad_medida, instruccion
+FROM vw_recetas_chef
+WHERE ROWNUM <= 15
+ORDER BY platillo, nombre_ingrediente;
+
 -- DML controlado: INSERT, UPDATE, DELETE, SAVEPOINT, ROLLBACK, COMMIT y TRUNCATE.
 BEGIN
     EXECUTE IMMEDIATE 'DROP TABLE tmp_evidencia_dml';
@@ -143,3 +168,10 @@ DROP TABLE tmp_evidencia_dml;
 -- END;
 -- /
 
+-- Registrar invitado desde PL/SQL:
+-- DECLARE
+--     v_id_invitado NUMBER;
+-- BEGIN
+--     sp_registrar_invitado(4, 1, 'Invitado SQL Developer', 'invitado.sql@example.com', '492-000-0000', v_id_invitado);
+-- END;
+-- /

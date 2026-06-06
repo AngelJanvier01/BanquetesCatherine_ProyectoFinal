@@ -15,6 +15,7 @@ INSERT INTO USUARIO VALUES (sq_usuario.NEXTVAL, 'cliente.jorge', 'pbkdf2_sha256$
 INSERT INTO USUARIO VALUES (sq_usuario.NEXTVAL, 'cliente.paola', 'pbkdf2_sha256$260000$banquetes2026$scahtqKPVEah5jG3mRBkQEQmb5muLekk84hwCx3A6hk=', 'CLIENTE', 'S', SYSDATE);
 INSERT INTO USUARIO VALUES (sq_usuario.NEXTVAL, 'cliente.ricardo', 'pbkdf2_sha256$260000$banquetes2026$scahtqKPVEah5jG3mRBkQEQmb5muLekk84hwCx3A6hk=', 'CLIENTE', 'S', SYSDATE);
 INSERT INTO USUARIO VALUES (sq_usuario.NEXTVAL, 'cliente.elena', 'pbkdf2_sha256$260000$banquetes2026$scahtqKPVEah5jG3mRBkQEQmb5muLekk84hwCx3A6hk=', 'CLIENTE', 'S', SYSDATE);
+INSERT INTO USUARIO VALUES (sq_usuario.NEXTVAL, 'chef.renata', 'pbkdf2_sha256$260000$banquetes2026$kJvbx30T9M9Wh566lhW/mz4Wi8deYLS9OOS7+bRrKtk=', 'CHEF', 'S', SYSDATE);
 
 INSERT INTO GERENTE VALUES (sq_gerente.NEXTVAL, 1, 'Catherine Rivera', 'admin@banquetescatherine.local', '555-100-0001', 'ACTIVO');
 INSERT INTO GERENTE VALUES (sq_gerente.NEXTVAL, 2, 'Lucia Montes', 'lucia@banquetescatherine.local', '555-100-0002', 'ACTIVO');
@@ -31,14 +32,14 @@ INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 11, 'Paola', 'Vega', 'paola.vega
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 12, 'Ricardo', 'Leon', 'ricardo.leon@example.com', '555-200-0009', 'Calle Mar 88', SYSDATE);
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 13, 'Elena', 'Campos', 'elena.campos@example.com', '555-200-0010', 'Av. Jardin 42', SYSDATE);
 
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 4, 'FUERTE', 'CLASICO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 4, 'FUERTE', 'VEGETARIANO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 6, 'FUERTE', 'PREMIUM', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 4, 'FUERTE', 'LIGERO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 4, 'FUERTE', 'CLASICO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 8, 'ENTRADA', 'VEGETARIANO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 6, 'ENTRADA', 'LIGERO', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 10, 'POSTRE', 'CLASICO', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 82.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 61.00, 4, 'FUERTE', 'VEGETARIANO', 'ALTA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 138.00, 6, 'FUERTE', 'PREMIUM', 'ALTA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 79.00, 4, 'FUERTE', 'LIGERO', 'MEDIA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 65.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'S');
 
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'FILETE DE RES', 'GRAMOS', 'GRANEL', 'Corte fresco');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE MORRON', 'PIEZAS', 'PIEZA', 'Rojo o verde');
@@ -100,11 +101,12 @@ INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'SERVICIO DE MESEROS', '
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'LOZA PREMIUM', 'Loza y cristaleria elegante', 45.00, 'S');
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'TORNAFIESTA', 'Antojitos para cierre de evento', 95.00, 'S');
 
-INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Salon Jardin Imperial', 'Av. Jardines 100', 'S', 18000.00, 120, 'Laura Pineda', '555-300-0001', 'jardin.imperial@example.com', 'S');
-INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Terraza Las Fuentes', 'Calle Fuente 45', 'S', 25000.00, 220, 'Hector Ruiz', '555-300-0002', 'fuentes@example.com', 'S');
-INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Gran Salon Catedral', 'Centro Historico 12', 'S', 42000.00, 450, 'Miriam Cano', '555-300-0003', 'catedral@example.com', 'S');
-INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Hacienda del Lago', 'Camino Lago Km 8', 'S', 36000.00, 300, 'Roberto Marin', '555-300-0004', 'lago@example.com', 'S');
-INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Salon Ejecutivo Norte', 'Av. Industria 88', 'S', 12000.00, 80, 'Claudia Meza', '555-300-0005', 'ejecutivo.norte@example.com', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Palacio de Convenciones Zacatecas', 'Blvd. Heroes de Chapultepec S/N, Ciudad Gobierno, Zacatecas', 'Ciudad Gobierno', 'Recinto amplio para congresos, graduaciones y banquetes grandes; convenio simulado para el proyecto escolar.', 'img/salon-zacatecas-convenciones.png', 'S', 68000.00, 900, 'Operaciones Palacio', '492-491-4575', 'operaciones@convencioneszacatecas.local', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Hotel Emporio Zacatecas - Terraza', 'Av. Hidalgo 703, Centro Historico, Zacatecas', 'Centro Historico', 'Terraza y salones para bodas, reuniones empresariales y cenas formales en zona centrica.', 'img/salon-zacatecas-colonial.png', 'S', 42000.00, 160, 'Grupos Emporio', '492-925-6500', 'zacatecas.grupos@emporio.local', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Meson de Jobito - Patio Colonial', 'Jardin de la Madre 108, Centro, Zacatecas', 'Centro Historico', 'Patio colonial para recepciones medianas, bodas civiles y eventos sociales con montaje elegante.', 'img/salon-zacatecas-colonial.png', 'S', 38000.00, 180, 'Ventas Jobito', '492-924-1722', 'ventas@mesondejobito.local', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'Corporativo La Cebada', 'Centro Historico, Zacatecas', 'Centro Historico', 'Salon con jardin y muros de cristal para bodas, XV anios y eventos sociales.', 'img/salon-zacatecas-jardin.png', 'S', 46000.00, 260, 'Coordinacion La Cebada', '492-000-2000', 'eventos@lacebada.local', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'La Esperanza Finca Jardin', 'Lopez de Nava 503, Zacatecas', 'Zona A', 'Finca jardin local con terraza rodeada de naturaleza para eventos familiares y recepciones.', 'img/salon-zacatecas-jardin.png', 'S', 30000.00, 120, 'Eventos La Esperanza', '492-559-2676', 'contacto@laesperanza.local', 'S');
+INSERT INTO SALON VALUES (sq_salon.NEXTVAL, 'El Patio Salon de Eventos', 'Alejandro Volta 221, Zona A, Zacatecas', 'Zona A', 'Salon practico para eventos familiares, cumpleanios y reuniones privadas.', 'img/salon-zacatecas-colonial.png', 'S', 18000.00, 90, 'Administracion El Patio', '492-768-6129', 'salondeeventoselpatio@local', 'S');
 
 INSERT INTO PAQUETE VALUES (sq_paquete.NEXTVAL, 'Paquete Clasico', 'Entrada, fuerte y postre para evento social', 420.00, 'S', 'N', NULL, 'S');
 INSERT INTO PAQUETE VALUES (sq_paquete.NEXTVAL, 'Paquete Ejecutivo', 'Servicio formal para reuniones de negocio', 520.00, 'S', 'N', NULL, 'S');
@@ -189,6 +191,11 @@ INSERT INTO PROYECTO_COMPLEMENTO VALUES (sq_proyecto_complemento.NEXTVAL, 1, 3, 
 INSERT INTO PROYECTO_COMPLEMENTO VALUES (sq_proyecto_complemento.NEXTVAL, 3, 4, 2, 900.00);
 INSERT INTO PROYECTO_COMPLEMENTO VALUES (sq_proyecto_complemento.NEXTVAL, 8, 2, 280, 85.00);
 INSERT INTO PROYECTO_COMPLEMENTO VALUES (sq_proyecto_complemento.NEXTVAL, 10, 5, 420, 45.00);
+
+INSERT INTO INVITADO_EVENTO VALUES (sq_invitado.NEXTVAL, 1, 'Laura Hernandez', 'laura.invitada@example.com', '555-777-1001', 'CONFIRMADO', SYSDATE - 1, SYSDATE);
+INSERT INTO INVITADO_EVENTO VALUES (sq_invitado.NEXTVAL, 1, 'Carlos Rivera', 'carlos.invitado@example.com', '555-777-1002', 'PENDIENTE', SYSDATE - 1, NULL);
+INSERT INTO INVITADO_EVENTO VALUES (sq_invitado.NEXTVAL, 2, 'Martha Salas', 'martha.invitada@example.com', '555-777-1003', 'RECHAZADO', SYSDATE - 2, SYSDATE - 1);
+INSERT INTO INVITADO_EVENTO VALUES (sq_invitado.NEXTVAL, 3, 'Equipo Ventas Nova', 'ventas.invitado@example.com', '555-777-1004', 'PENDIENTE', SYSDATE, NULL);
 
 INSERT INTO NOTIFICACION VALUES (sq_notificacion.NEXTVAL, 'CLIENTE', 1, 1, NULL, 'WEB', 'Proyecto creado', 'Proyecto activo de prueba.', 'PENDIENTE', SYSDATE, NULL);
 INSERT INTO NOTIFICACION VALUES (sq_notificacion.NEXTVAL, 'INSTALACION', NULL, 1, 1, 'CORREO', 'Evento confirmado', 'Preparar salon para boda.', 'PENDIENTE', SYSDATE, NULL);

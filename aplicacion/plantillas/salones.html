@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block titulo %}Salones en Zacatecas{% endblock %}
+
+{% block contenido %}
+<section class="seccion contenedor">
+    <div class="encabezado-seccion">
+        <div>
+            <p class="etiqueta">Convenios locales</p>
+            <h1>Salones en Zacatecas</h1>
+            <p>Opciones locales con capacidad, renta y contacto de instalacion para validar proyectos.</p>
+        </div>
+        <button class="boton boton-oscuro abrir-agenda" type="button">Agendar</button>
+    </div>
+    <div class="rejilla tarjetas tarjetas-salones">
+        {% for salon in salones %}
+            <article class="tarjeta tarjeta-salon">
+                {% if salon.foto_url %}
+                    <img src="{{ url_for('static', filename=salon.foto_url) }}" alt="{{ salon.nombre }}">
+                {% endif %}
+                <div class="tarjeta-salon-cuerpo">
+                    <span class="pildora">{{ salon.capacidad_maxima }} personas</span>
+                    <h3>{{ salon.nombre }}</h3>
+                    <p>{{ salon.descripcion }}</p>
+                    <dl class="datos-mini">
+                        <div><dt>Zona</dt><dd>{{ salon.zona }}</dd></div>
+                        <div><dt>Renta</dt><dd>${{ "%.2f"|format(salon.costo_renta) }}</dd></div>
+                        <div><dt>Contacto</dt><dd>{{ salon.contacto_instalacion }}</dd></div>
+                        <div><dt>Telefono</dt><dd>{{ salon.telefono_contacto }}</dd></div>
+                    </dl>
+                    <p class="texto-suave">{{ salon.direccion }}</p>
+                    <button class="boton boton-oscuro abrir-agenda" type="button">Agendar aqui</button>
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -22,19 +22,21 @@ app = Flask(
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "banquetes-catherine-demo")
 
 
-def obtener_catalogos():
+def cargar_opciones_solicitud():
     datos = {
-        "platillos": [],
-        "complementos": [],
         "salones": [],
         "paquetes": [],
         "error_bd": None,
     }
     try:
-        datos["platillos"] = consultar("SELECT * FROM vw_platillos_publicos ORDER BY nombre", accion="Catalogo publico: platillos")
-        datos["complementos"] = consultar("SELECT * FROM vw_complementos_publicos ORDER BY nombre", accion="Catalogo publico: complementos")
-        datos["salones"] = consultar("SELECT * FROM vw_salones_publicos ORDER BY capacidad_maxima", accion="Catalogo publico: salones")
-        datos["paquetes"] = consultar("SELECT * FROM vw_paquetes_publicos ORDER BY precio_base", accion="Catalogo publico: paquetes")
+        datos["salones"] = consultar(
+            "SELECT id_salon, nombre, capacidad_maxima, costo_renta FROM vw_salones_publicos ORDER BY capacidad_maxima",
+            accion="Agenda modal: opciones salones",
+        )
+        datos["paquetes"] = consultar(
+            "SELECT id_paquete, nombre, precio_base FROM vw_paquetes_publicos ORDER BY precio_base",
+            accion="Agenda modal: opciones paquetes",
+        )
     except Exception as error:
         datos["error_bd"] = str(error)
     return datos
@@ -42,7 +44,30 @@ def obtener_catalogos():
 
 @app.route("/")
 def inicio():
-    return render_template("inicio.html", **obtener_catalogos())
+    return render_template("inicio.html")
+
+
+@app.get("/platillos")
+def platillos_publicos():
+    platillos = consultar("SELECT * FROM vw_platillos_publicos ORDER BY categoria, nombre", accion="Catalogo publico: platillos")
+    return render_template("platillos.html", platillos=platillos)
+
+
+@app.get("/complementos")
+def complementos_publicos():
+    complementos = consultar("SELECT * FROM vw_complementos_publicos ORDER BY nombre", accion="Catalogo publico: complementos")
+    return render_template("complementos.html", complementos=complementos)
+
+
+@app.get("/salones")
+def salones_publicos():
+    salones = consultar("SELECT * FROM vw_salones_publicos ORDER BY capacidad_maxima", accion="Catalogo publico: salones")
+    return render_template("salones.html", salones=salones)
+
+
+@app.get("/api/opciones-solicitud")
+def api_opciones_solicitud():
+    return jsonify(cargar_opciones_solicitud())
 
 
 @app.get("/consola-sql")
@@ -94,7 +119,7 @@ def crear_solicitud():
     except Exception as error:
         registrar_procedimiento("Solicitud publica: crear solicitud", "sp_crear_solicitud", resultado="Error; ROLLBACK", error=error)
         flash(f"No se pudo registrar la solicitud: {error}", "error")
-    return redirect(url_for("inicio"))
+    return redirect(request.referrer or url_for("inicio"))
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -128,6 +153,8 @@ def login():
 
     if usuario["rol"] == "CLIENTE":
         return redirect(url_for("panel_cliente"))
+    if usuario["rol"] == "CHEF":
+        return redirect(url_for("panel_chef"))
     return redirect(url_for("panel_gerente"))
 
 
@@ -177,7 +204,40 @@ def panel_cliente():
         {"id_usuario": session["id_usuario"]},
         accion="Panel cliente: notificaciones",
     )
-    return render_template("cliente.html", proyectos=proyectos, paquetes=paquetes, notificaciones=notificaciones)
+    solicitudes = consultar(
+        """
+        SELECT ss.*, NVL(s.nombre, 'Sin preferencia') AS salon_preferido,
+               NVL(p.nombre, 'Sin preferencia') AS paquete_preferido
+        FROM SOLICITUD_SERVICIO ss
+        LEFT JOIN SALON s ON s.id_salon = ss.id_salon_preferido
+        LEFT JOIN PAQUETE p ON p.id_paquete = ss.id_paquete_preferido
+        WHERE ss.correo = (SELECT correo FROM CLIENTE WHERE id_usuario = :id_usuario)
+        ORDER BY ss.fecha_solicitud DESC
+        """,
+        {"id_usuario": session["id_usuario"]},
+        accion="Panel cliente: solicitudes propias",
+    )
+    invitados = consultar(
+        """
+        SELECT inv.*
+        FROM vw_invitados_proyecto inv
+        INNER JOIN CLIENTE c ON c.id_cliente = inv.id_cliente
+        WHERE c.id_usuario = :id_usuario
+        ORDER BY inv.id_proyecto, inv.nombre
+        """,
+        {"id_usuario": session["id_usuario"]},
+        accion="Panel cliente: invitados por proyecto",
+    )
+    opciones = cargar_opciones_solicitud()
+    return render_template(
+        "cliente.html",
+        proyectos=proyectos,
+        paquetes=paquetes,
+        notificaciones=notificaciones,
+        solicitudes=solicitudes,
+        invitados=invitados,
+        opciones=opciones,
+    )
 
 
 @app.post("/cliente/proyectos/<int:id_proyecto>/invitados")
@@ -196,10 +256,99 @@ def actualizar_invitados(id_proyecto):
     return redirect(url_for("panel_cliente"))
 
 
+@app.post("/cliente/solicitudes/<int:id_solicitud>/actualizar")
+@sesion_requerida("CLIENTE")
+def actualizar_solicitud_cliente(id_solicitud):
+    sql = """
+        UPDATE SOLICITUD_SERVICIO
+        SET fecha_evento = TO_DATE(:fecha_evento, 'YYYY-MM-DD'),
+            numero_invitados = :numero_invitados,
+            id_salon_preferido = :id_salon_preferido,
+            id_paquete_preferido = :id_paquete_preferido,
+            mensaje = :mensaje,
+            observaciones = 'Actualizada por el cliente desde el portal'
+        WHERE id_solicitud = :id_solicitud
+          AND estatus = 'PENDIENTE'
+          AND correo = (SELECT correo FROM CLIENTE WHERE id_usuario = :id_usuario)
+    """
+    parametros = {
+        "fecha_evento": request.form["fecha_evento"],
+        "numero_invitados": int(request.form["numero_invitados"]),
+        "id_salon_preferido": int(request.form["id_salon_preferido"]) if request.form.get("id_salon_preferido") else None,
+        "id_paquete_preferido": int(request.form["id_paquete_preferido"]) if request.form.get("id_paquete_preferido") else None,
+        "mensaje": request.form.get("mensaje"),
+        "id_solicitud": id_solicitud,
+        "id_usuario": session["id_usuario"],
+    }
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(sql, parametros)
+                filas = cursor.rowcount
+                if filas == 0:
+                    raise ValueError("Solo se pueden modificar solicitudes pendientes propias.")
+                conexion.commit()
+                registrar_evento_sql("Cliente: actualizar solicitud pendiente", sql, parametros, filas=filas, resultado="Solicitud actualizada; COMMIT")
+        flash("Solicitud actualizada.", "exito")
+    except Exception as error:
+        registrar_evento_sql("Cliente: actualizar solicitud pendiente", sql, parametros, resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        flash(f"No se pudo actualizar la solicitud: {error}", "error")
+    return redirect(url_for("panel_cliente"))
+
+
+@app.post("/cliente/proyectos/<int:id_proyecto>/invitados-evento")
+@sesion_requerida("CLIENTE")
+def registrar_invitado_evento(id_proyecto):
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                id_invitado = cursor.var(oracledb.NUMBER)
+                parametros = [
+                    session["id_usuario"],
+                    id_proyecto,
+                    request.form["nombre"],
+                    request.form.get("correo"),
+                    request.form.get("telefono"),
+                    id_invitado,
+                ]
+                cursor.callproc("sp_registrar_invitado", parametros)
+                registrar_procedimiento("Cliente: simular envio de invitacion", "sp_registrar_invitado", parametros, f"Invitado {int(id_invitado.getvalue())}; notificacion; COMMIT")
+        flash("Invitacion simulada y registrada.", "exito")
+    except Exception as error:
+        registrar_procedimiento("Cliente: simular envio de invitacion", "sp_registrar_invitado", resultado="Error; ROLLBACK", error=error)
+        flash(f"No se pudo registrar invitado: {error}", "error")
+    return redirect(url_for("panel_cliente"))
+
+
+@app.post("/cliente/invitados/<int:id_invitado>/confirmar")
+@sesion_requerida("CLIENTE")
+def confirmar_invitado_evento(id_invitado):
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                parametros = [session["id_usuario"], id_invitado, request.form["estatus_confirmacion"]]
+                cursor.callproc("sp_confirmar_invitado", parametros)
+                registrar_procedimiento("Cliente: confirmar invitado", "sp_confirmar_invitado", parametros, "Confirmacion actualizada; COMMIT")
+        flash("Confirmacion de invitado actualizada.", "exito")
+    except Exception as error:
+        registrar_procedimiento("Cliente: confirmar invitado", "sp_confirmar_invitado", resultado="Error; ROLLBACK", error=error)
+        flash(f"No se pudo confirmar invitado: {error}", "error")
+    return redirect(url_for("panel_cliente"))
+
+
 @app.get("/gerente")
 @sesion_requerida("GERENTE", "GERENTE_ADMIN")
 def panel_gerente():
     solicitudes = consultar("SELECT * FROM vw_solicitudes_pendientes ORDER BY fecha_solicitud", accion="Panel gerente: solicitudes pendientes")
+    solicitudes_todas = consultar(
+        """
+        SELECT ss.id_solicitud, ss.nombre_contacto, ss.correo, ss.fecha_evento, ss.numero_invitados,
+               ss.estatus, ss.mensaje, ss.observaciones, ss.id_salon_preferido, ss.id_paquete_preferido
+        FROM SOLICITUD_SERVICIO ss
+        ORDER BY ss.fecha_solicitud DESC
+        """,
+        accion="Panel gerente: solicitudes para modificar",
+    )
     proyectos = consultar(
         """
         SELECT pe.id_proyecto, pe.nombre_evento, pe.fecha_evento, pe.numero_invitados,
@@ -219,15 +368,18 @@ def panel_gerente():
     salones = consultar("SELECT id_salon, nombre, capacidad_maxima FROM SALON WHERE activo = 'S' ORDER BY capacidad_maxima", accion="Panel gerente: catalogo salones")
     paquetes = consultar("SELECT id_paquete, nombre, personalizado, id_cliente FROM PAQUETE WHERE activo = 'S' ORDER BY nombre", accion="Panel gerente: catalogo paquetes")
     platillos = consultar("SELECT id_platillo, nombre FROM PLATILLO WHERE activo = 'S' ORDER BY nombre", accion="Panel gerente: catalogo platillos")
+    ingredientes = consultar("SELECT id_ingrediente, nombre_ingrediente, unidad_medida FROM INGREDIENTE ORDER BY nombre_ingrediente", accion="Panel gerente: catalogo ingredientes")
     return render_template(
         "gerente.html",
         solicitudes=solicitudes,
+        solicitudes_todas=solicitudes_todas,
         proyectos=proyectos,
         clientes=clientes,
         gerentes=gerentes,
         salones=salones,
         paquetes=paquetes,
         platillos=platillos,
+        ingredientes=ingredientes,
     )
 
 
@@ -260,6 +412,41 @@ def convertir_solicitud(id_solicitud):
     except Exception as error:
         registrar_procedimiento("Gerente: convertir solicitud en proyecto", "sp_crear_proyecto_desde_solicitud", resultado="Error; ROLLBACK", error=error)
         flash(f"No se pudo convertir la solicitud: {error}", "error")
+    return redirect(url_for("panel_gerente"))
+
+
+@app.post("/gerente/solicitudes/<int:id_solicitud>/actualizar")
+@sesion_requerida("GERENTE", "GERENTE_ADMIN")
+def actualizar_solicitud_gerente(id_solicitud):
+    sql = """
+        UPDATE SOLICITUD_SERVICIO
+        SET fecha_evento = TO_DATE(:fecha_evento, 'YYYY-MM-DD'),
+            numero_invitados = :numero_invitados,
+            id_salon_preferido = :id_salon_preferido,
+            id_paquete_preferido = :id_paquete_preferido,
+            estatus = :estatus,
+            observaciones = :observaciones
+        WHERE id_solicitud = :id_solicitud
+    """
+    parametros = {
+        "fecha_evento": request.form["fecha_evento"],
+        "numero_invitados": int(request.form["numero_invitados"]),
+        "id_salon_preferido": int(request.form["id_salon_preferido"]) if request.form.get("id_salon_preferido") else None,
+        "id_paquete_preferido": int(request.form["id_paquete_preferido"]) if request.form.get("id_paquete_preferido") else None,
+        "estatus": request.form["estatus"],
+        "observaciones": request.form.get("observaciones"),
+        "id_solicitud": id_solicitud,
+    }
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(sql, parametros)
+                conexion.commit()
+                registrar_evento_sql("Gerente: modificar solicitud propuesta", sql, parametros, filas=cursor.rowcount, resultado="Solicitud modificada; COMMIT")
+        flash("Solicitud modificada por gerencia.", "exito")
+    except Exception as error:
+        registrar_evento_sql("Gerente: modificar solicitud propuesta", sql, parametros, resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        flash(f"No se pudo modificar la solicitud: {error}", "error")
     return redirect(url_for("panel_gerente"))
 
 
@@ -349,7 +536,7 @@ def crear_paquete_personalizado():
 
 
 @app.post("/gerente/platillos")
-@sesion_requerida("GERENTE", "GERENTE_ADMIN")
+@sesion_requerida("GERENTE", "GERENTE_ADMIN", "CHEF")
 def crear_platillo():
     try:
         with abrir_conexion() as conexion:
@@ -359,9 +546,11 @@ def crear_platillo():
                     request.form["nombre"],
                     request.form["descripcion"],
                     float(request.form["precio"]),
+                    float(request.form.get("costo_estimado") or 0),
                     int(request.form["porciones_base"]),
                     request.form["categoria"],
                     request.form["tipo_dieta"],
+                    request.form.get("dificultad") or "MEDIA",
                     id_platillo,
                 ]
                 cursor.callproc(
@@ -370,25 +559,35 @@ def crear_platillo():
                 )
                 nuevo_id = int(id_platillo.getvalue())
                 registrar_procedimiento("Gerente: alta de platillo", "sp_alta_platillo", parametros_platillo, f"Platillo {nuevo_id}; COMMIT")
-                id_ingrediente_var = cursor.var(oracledb.NUMBER)
-                sql_ingrediente = """
-                    INSERT INTO INGREDIENTE (id_ingrediente, nombre_ingrediente, unidad_medida, presentacion, observacion)
-                    VALUES (sq_ingrediente.NEXTVAL, UPPER(:nombre), :unidad, :presentacion, :observacion)
-                    RETURNING id_ingrediente INTO :id_ingrediente
-                    """
-                parametros_ingrediente = {
-                    "nombre": request.form["ingrediente"],
-                    "unidad": request.form["unidad_medida"],
-                    "presentacion": request.form.get("presentacion"),
-                    "observacion": request.form.get("observacion"),
-                    "id_ingrediente": id_ingrediente_var,
-                }
-                cursor.execute(
-                    sql_ingrediente,
-                    parametros_ingrediente,
-                )
-                id_ingrediente = int(id_ingrediente_var.getvalue()[0])
-                registrar_evento_sql("Gerente: insertar ingrediente", sql_ingrediente, parametros_ingrediente, filas=1, resultado=f"Ingrediente {id_ingrediente} insertado")
+                if request.form.get("id_ingrediente_existente"):
+                    id_ingrediente = int(request.form["id_ingrediente_existente"])
+                    registrar_evento_sql(
+                        "Cocina: usar ingrediente existente",
+                        "SELECT id_ingrediente, nombre_ingrediente FROM INGREDIENTE WHERE id_ingrediente = :id_ingrediente",
+                        {"id_ingrediente": id_ingrediente},
+                        filas=1,
+                        resultado=f"Ingrediente existente {id_ingrediente}",
+                    )
+                else:
+                    id_ingrediente_var = cursor.var(oracledb.NUMBER)
+                    sql_ingrediente = """
+                        INSERT INTO INGREDIENTE (id_ingrediente, nombre_ingrediente, unidad_medida, presentacion, observacion)
+                        VALUES (sq_ingrediente.NEXTVAL, UPPER(:nombre), :unidad, :presentacion, :observacion)
+                        RETURNING id_ingrediente INTO :id_ingrediente
+                        """
+                    parametros_ingrediente = {
+                        "nombre": request.form["ingrediente"],
+                        "unidad": request.form["unidad_medida"],
+                        "presentacion": request.form.get("presentacion"),
+                        "observacion": request.form.get("observacion"),
+                        "id_ingrediente": id_ingrediente_var,
+                    }
+                    cursor.execute(
+                        sql_ingrediente,
+                        parametros_ingrediente,
+                    )
+                    id_ingrediente = int(id_ingrediente_var.getvalue()[0])
+                    registrar_evento_sql("Cocina: insertar ingrediente", sql_ingrediente, parametros_ingrediente, filas=1, resultado=f"Ingrediente {id_ingrediente} insertado")
                 sql_relacion = """
                     INSERT INTO PLATILLO_INGREDIENTE (folio_pi, id_platillo, id_ingrediente, cantidad)
                     VALUES (sq_platillo_ingrediente.NEXTVAL, :id_platillo, :id_ingrediente, :cantidad)
@@ -402,7 +601,7 @@ def crear_platillo():
                     sql_relacion,
                     parametros_relacion,
                 )
-                registrar_evento_sql("Gerente: relacionar platillo ingrediente", sql_relacion, parametros_relacion, filas=1, resultado="Relacion insertada")
+                registrar_evento_sql("Cocina: relacionar platillo ingrediente", sql_relacion, parametros_relacion, filas=1, resultado="Relacion insertada")
                 sql_instruccion = """
                     INSERT INTO INSTRUCCION (id_instruccion, id_platillo, numero_paso, instruccion, detalle_instruccion)
                     VALUES (sq_instruccion.NEXTVAL, :id_platillo, 1, :instruccion, :detalle)
@@ -417,12 +616,104 @@ def crear_platillo():
                     parametros_instruccion,
                 )
                 conexion.commit()
-                registrar_evento_sql("Gerente: insertar instruccion", sql_instruccion, parametros_instruccion, filas=1, resultado="Instruccion insertada; COMMIT")
+                registrar_evento_sql("Cocina: insertar instruccion", sql_instruccion, parametros_instruccion, filas=1, resultado="Instruccion insertada; COMMIT")
         flash("Platillo, ingrediente e instruccion registrados.", "exito")
     except Exception as error:
-        registrar_evento_sql("Gerente: alta de platillo completo", "SAVEPOINT antes_de_platillo; INSERT/RELACIONES/INSTRUCCION", resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        registrar_evento_sql("Cocina: alta de platillo completo", "SAVEPOINT antes_de_platillo; INSERT/RELACIONES/INSTRUCCION", resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
         flash(f"No se pudo crear el platillo: {error}", "error")
+    if session.get("rol") == "CHEF":
+        return redirect(url_for("panel_chef"))
     return redirect(url_for("panel_gerente"))
+
+
+@app.get("/chef")
+@sesion_requerida("CHEF")
+def panel_chef():
+    platillos = consultar(
+        """
+        SELECT id_platillo, nombre, descripcion, precio, costo_estimado,
+               porciones_base, categoria, tipo_dieta, dificultad
+        FROM PLATILLO
+        WHERE activo = 'S'
+        ORDER BY categoria, nombre
+        """,
+        accion="Panel chef: platillos",
+    )
+    ingredientes = consultar(
+        "SELECT id_ingrediente, nombre_ingrediente, unidad_medida, presentacion FROM INGREDIENTE ORDER BY nombre_ingrediente",
+        accion="Panel chef: ingredientes",
+    )
+    recetas = consultar(
+        """
+        SELECT *
+        FROM vw_recetas_chef
+        ORDER BY platillo, nombre_ingrediente, numero_paso
+        """,
+        accion="Panel chef: recetas completas",
+    )
+    return render_template("chef.html", platillos=platillos, ingredientes=ingredientes, recetas=recetas)
+
+
+@app.post("/chef/platillos/<int:id_platillo>/ingredientes")
+@sesion_requerida("CHEF")
+def chef_agregar_ingrediente(id_platillo):
+    sql = """
+        INSERT INTO PLATILLO_INGREDIENTE (folio_pi, id_platillo, id_ingrediente, cantidad)
+        VALUES (sq_platillo_ingrediente.NEXTVAL, :id_platillo, :id_ingrediente, :cantidad)
+    """
+    parametros = {
+        "id_platillo": id_platillo,
+        "id_ingrediente": int(request.form["id_ingrediente"]),
+        "cantidad": float(request.form["cantidad"]),
+    }
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(sql, parametros)
+                conexion.commit()
+                registrar_evento_sql("Chef: agregar ingrediente a receta", sql, parametros, filas=cursor.rowcount, resultado="Ingrediente relacionado; COMMIT")
+        flash("Ingrediente agregado a la receta.", "exito")
+    except Exception as error:
+        registrar_evento_sql("Chef: agregar ingrediente a receta", sql, parametros, resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        flash(f"No se pudo agregar ingrediente: {error}", "error")
+    return redirect(url_for("panel_chef"))
+
+
+@app.post("/chef/platillos/<int:id_platillo>/instrucciones")
+@sesion_requerida("CHEF")
+def chef_agregar_instruccion(id_platillo):
+    sql_paso = "SELECT NVL(MAX(numero_paso), 0) + 1 AS siguiente_paso FROM INSTRUCCION WHERE id_platillo = :id_platillo"
+    sql = """
+        INSERT INTO INSTRUCCION (id_instruccion, id_platillo, numero_paso, instruccion, detalle_instruccion)
+        VALUES (sq_instruccion.NEXTVAL, :id_platillo, :numero_paso, :instruccion, :detalle)
+    """
+    parametros = {
+        "id_platillo": id_platillo,
+        "instruccion": request.form["instruccion"],
+        "detalle": request.form.get("detalle_instruccion"),
+    }
+    try:
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                cursor.execute(sql_paso, {"id_platillo": id_platillo})
+                numero_paso = int(cursor.fetchone()[0])
+                registrar_evento_sql(
+                    "Chef: calcular siguiente paso",
+                    sql_paso,
+                    {"id_platillo": id_platillo},
+                    filas=1,
+                    resultado=f"Siguiente paso {numero_paso}",
+                    muestra=[{"siguiente_paso": numero_paso}],
+                )
+                parametros["numero_paso"] = numero_paso
+                cursor.execute(sql, parametros)
+                conexion.commit()
+                registrar_evento_sql("Chef: agregar instruccion de receta", sql, parametros, filas=cursor.rowcount, resultado="Instruccion agregada; COMMIT")
+        flash("Instruccion agregada.", "exito")
+    except Exception as error:
+        registrar_evento_sql("Chef: agregar instruccion de receta", sql, parametros, resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        flash(f"No se pudo agregar instruccion: {error}", "error")
+    return redirect(url_for("panel_chef"))
 
 
 @app.route("/gerente/reportes", methods=["GET", "POST"])
@@ -470,6 +761,6 @@ if __name__ == "__main__":
     app.run(
         host=os.getenv("FLASK_HOST", "127.0.0.1"),
         port=int(os.getenv("FLASK_PORT", "5000")),
-        debug=True,
+        debug=os.getenv("FLASK_DEBUG", "N").upper() == "S",
         use_reloader=False,
     )

@@ -42,6 +42,28 @@
                         - {{ evento.filas }} fila(s)
                     {% endif %}
                 </p>
+                {% if evento.muestra %}
+                    <div class="resultado-sql">
+                        <table>
+                            <thead>
+                                <tr>
+                                    {% for columna in evento.muestra[0].keys() %}
+                                        <th>{{ columna }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fila in evento.muestra %}
+                                    <tr>
+                                        {% for valor in fila.values() %}
+                                            <td>{{ valor }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
             </article>
         {% else %}
             <article class="evento-sql">
@@ -52,4 +74,3 @@
     </div>
 </section>
 {% endblock %}
-

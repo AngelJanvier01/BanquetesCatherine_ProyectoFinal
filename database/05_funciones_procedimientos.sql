@@ -557,9 +557,11 @@ CREATE OR REPLACE PROCEDURE sp_alta_platillo(
     p_nombre IN VARCHAR2,
     p_descripcion IN VARCHAR2,
     p_precio IN NUMBER,
+    p_costo_estimado IN NUMBER,
     p_porciones_base IN NUMBER,
     p_categoria IN VARCHAR2,
     p_tipo_dieta IN VARCHAR2,
+    p_dificultad IN VARCHAR2,
     p_id_platillo OUT NUMBER
 )
 IS
@@ -571,17 +573,21 @@ BEGIN
         nombre,
         descripcion,
         precio,
+        costo_estimado,
         porciones_base,
         categoria,
-        tipo_dieta
+        tipo_dieta,
+        dificultad
     ) VALUES (
         sq_platillo.NEXTVAL,
         UPPER(TRIM(p_nombre)),
         p_descripcion,
         p_precio,
+        p_costo_estimado,
         p_porciones_base,
         p_categoria,
-        p_tipo_dieta
+        p_tipo_dieta,
+        UPPER(TRIM(p_dificultad))
     )
     RETURNING id_platillo INTO p_id_platillo;
 
@@ -589,6 +595,91 @@ BEGIN
 EXCEPTION
     WHEN OTHERS THEN
         ROLLBACK TO antes_de_platillo;
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE sp_registrar_invitado(
+    p_id_usuario_cliente IN NUMBER,
+    p_id_proyecto IN NUMBER,
+    p_nombre IN VARCHAR2,
+    p_correo IN VARCHAR2,
+    p_telefono IN VARCHAR2,
+    p_id_invitado OUT NUMBER
+)
+IS
+    v_id_cliente CLIENTE.id_cliente%TYPE;
+BEGIN
+    SAVEPOINT antes_de_invitado;
+
+    SELECT c.id_cliente
+    INTO v_id_cliente
+    FROM CLIENTE c
+    INNER JOIN PROYECTO_EVENTO pe ON pe.id_cliente = c.id_cliente
+    WHERE c.id_usuario = p_id_usuario_cliente
+      AND pe.id_proyecto = p_id_proyecto
+      AND pe.estatus = 'ACTIVO';
+
+    INSERT INTO INVITADO_EVENTO (
+        id_invitado,
+        id_proyecto,
+        nombre,
+        correo,
+        telefono
+    ) VALUES (
+        sq_invitado.NEXTVAL,
+        p_id_proyecto,
+        INITCAP(TRIM(p_nombre)),
+        LOWER(TRIM(p_correo)),
+        p_telefono
+    )
+    RETURNING id_invitado INTO p_id_invitado;
+
+    sp_insertar_notificacion('CLIENTE', v_id_cliente, p_id_proyecto, NULL, 'CORREO',
+        'Invitacion enviada', 'Se simulo el envio de invitacion a ' || INITCAP(TRIM(p_nombre)) || '.');
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO antes_de_invitado;
+        ROLLBACK;
+        RAISE;
+END;
+/
+
+CREATE OR REPLACE PROCEDURE sp_confirmar_invitado(
+    p_id_usuario_cliente IN NUMBER,
+    p_id_invitado IN NUMBER,
+    p_estatus_confirmacion IN VARCHAR2
+)
+IS
+    v_id_cliente CLIENTE.id_cliente%TYPE;
+    v_id_proyecto PROYECTO_EVENTO.id_proyecto%TYPE;
+BEGIN
+    SAVEPOINT antes_de_confirmacion;
+
+    SELECT c.id_cliente, pe.id_proyecto
+    INTO v_id_cliente, v_id_proyecto
+    FROM INVITADO_EVENTO inv
+    INNER JOIN PROYECTO_EVENTO pe ON pe.id_proyecto = inv.id_proyecto
+    INNER JOIN CLIENTE c ON c.id_cliente = pe.id_cliente
+    WHERE c.id_usuario = p_id_usuario_cliente
+      AND inv.id_invitado = p_id_invitado
+    FOR UPDATE;
+
+    UPDATE INVITADO_EVENTO
+    SET estatus_confirmacion = p_estatus_confirmacion,
+        fecha_respuesta = SYSDATE
+    WHERE id_invitado = p_id_invitado;
+
+    sp_insertar_notificacion('CLIENTE', v_id_cliente, v_id_proyecto, NULL, 'WEB',
+        'Confirmacion de invitado', 'Un invitado quedo con estatus ' || p_estatus_confirmacion || '.');
+
+    COMMIT;
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK TO antes_de_confirmacion;
         ROLLBACK;
         RAISE;
 END;

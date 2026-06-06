@@ -61,9 +61,19 @@ a {
 }
 
 .marca {
+    display: grid;
+    gap: 0;
     font-size: 1.05rem;
     font-weight: 800;
     color: var(--verde);
+    line-height: 1.1;
+}
+
+.marca small {
+    color: var(--dorado);
+    font-size: 0.72rem;
+    letter-spacing: 0;
+    text-transform: uppercase;
 }
 
 .navegacion {
@@ -75,8 +85,18 @@ a {
     min-width: 0;
 }
 
-.navegacion a {
+.navegacion a,
+.enlace-nav {
     white-space: nowrap;
+}
+
+.enlace-nav {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
 }
 
 .hero {
@@ -104,6 +124,20 @@ a {
 .hero p {
     max-width: 560px;
     font-size: 1.1rem;
+}
+
+.acciones-hero,
+.acciones-panel {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.acciones-panel {
+    justify-content: flex-end;
+    margin-top: 0;
 }
 
 .etiqueta,
@@ -191,6 +225,61 @@ a {
     color: var(--verde);
 }
 
+.tarjeta-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.tarjeta-resumen {
+    min-height: 190px;
+}
+
+.tarjetas-salones {
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+}
+
+.tarjeta-salon {
+    padding: 0;
+    overflow: hidden;
+}
+
+.tarjeta-salon img {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    display: block;
+}
+
+.tarjeta-salon-cuerpo {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+}
+
+.datos-mini {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 14px;
+    margin: 0;
+}
+
+.datos-mini div {
+    min-width: 0;
+}
+
+.datos-mini dt {
+    color: var(--suave);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+}
+
+.datos-mini dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
 .lista-precios {
     display: grid;
     gap: 10px;
@@ -202,6 +291,28 @@ a {
     gap: 18px;
     padding: 14px 0;
     border-bottom: 1px solid var(--linea);
+}
+
+.lista-precios-grande > div {
+    padding: 20px;
+    background: var(--blanco);
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+}
+
+.lista-precios span {
+    display: grid;
+    gap: 4px;
+}
+
+.lista-precios small {
+    color: var(--suave);
+}
+
+.lista-compacta {
+    max-height: 520px;
+    overflow: auto;
+    padding-right: 4px;
 }
 
 .formulario-dos-columnas,
@@ -268,6 +379,12 @@ a {
     padding: 12px;
 }
 
+.formulario-simple {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    box-shadow: none;
+}
+
 .formulario.compacto input,
 .formulario.compacto select,
 .formulario.compacto button {
@@ -306,6 +423,12 @@ a {
 .boton-claro {
     background: var(--blanco);
     color: var(--verde);
+}
+
+.boton-transparente {
+    border: 1px solid rgba(255, 255, 255, 0.75);
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--blanco);
 }
 
 .boton-chico {
@@ -421,6 +544,62 @@ td span {
     gap: 8px;
 }
 
+.lista-invitados {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.modal-agenda {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    min-width: 0;
+}
+
+.modal-agenda.abierto {
+    display: grid;
+    place-items: center;
+    padding: 18px;
+}
+
+.modal-fondo {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 18, 15, 0.62);
+}
+
+.modal-contenido {
+    position: relative;
+    width: min(820px, 100%);
+    max-height: min(92vh, 860px);
+    overflow: auto;
+    padding: clamp(18px, 3vw, 28px);
+    background: var(--fondo);
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+    box-shadow: var(--sombra);
+}
+
+.modal-cerrar {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 34px;
+    height: 34px;
+    border: 1px solid var(--linea);
+    border-radius: 6px;
+    background: var(--blanco);
+    color: var(--verde);
+    cursor: pointer;
+    font-weight: 800;
+}
+
+.formulario-modal {
+    box-shadow: none;
+}
+
 .pie {
     display: flex;
     justify-content: space-between;
@@ -534,6 +713,31 @@ td span {
     color: #aebcb4;
 }
 
+.resultado-sql {
+    max-width: 100%;
+    margin-top: 10px;
+    overflow-x: auto;
+    border: 1px solid #26322c;
+    border-radius: 6px;
+}
+
+.resultado-sql table {
+    min-width: 520px;
+    font-size: 0.78rem;
+}
+
+.resultado-sql th,
+.resultado-sql td {
+    padding: 8px 10px;
+    border-color: #26322c;
+    color: #d9e6de;
+}
+
+.resultado-sql th {
+    background: #16201b;
+    color: #8bd2a8;
+}
+
 .evento-error header span,
 .evento-error pre {
     color: #ff9faf;
@@ -570,6 +774,10 @@ td span {
     .formulario-dos-columnas,
     .dos-columnas {
         grid-template-columns: 1fr;
+    }
+
+    .acciones-panel {
+        justify-content: flex-start;
     }
 
     .formulario {
@@ -612,7 +820,9 @@ td span {
     }
 
     .lista-precios > div,
-    .consola-acciones {
+    .consola-acciones,
+    .acciones-hero,
+    .acciones-panel {
         align-items: stretch;
         flex-direction: column;
     }
@@ -621,6 +831,10 @@ td span {
     .consola-acciones form,
     .consola-acciones button {
         width: 100%;
+    }
+
+    .datos-mini {
+        grid-template-columns: 1fr;
     }
 
     .terminal {

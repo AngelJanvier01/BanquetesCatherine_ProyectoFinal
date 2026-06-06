@@ -68,6 +68,54 @@
     </section>
 
     <section class="bloque">
+        <h2>Modificar solicitudes propuestas</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Solicitud</th>
+                        <th>Datos</th>
+                        <th>Ajuste gerente</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitud in solicitudes_todas[:8] %}
+                        <tr>
+                            <td>{{ solicitud.id_solicitud }}<br><span>{{ solicitud.nombre_contacto }} · {{ solicitud.estatus }}</span></td>
+                            <td>{{ solicitud.correo }}<br><span>{{ solicitud.mensaje }}</span></td>
+                            <td>
+                                <form class="formulario compacto" method="post" action="{{ url_for('actualizar_solicitud_gerente', id_solicitud=solicitud.id_solicitud) }}">
+                                    <input name="fecha_evento" type="date" value="{{ solicitud.fecha_evento.strftime('%Y-%m-%d') if solicitud.fecha_evento else '' }}" required>
+                                    <input name="numero_invitados" type="number" min="1" value="{{ solicitud.numero_invitados }}" required>
+                                    <select name="id_salon_preferido">
+                                        <option value="">Sin preferencia</option>
+                                        {% for salon in salones %}
+                                            <option value="{{ salon.id_salon }}" {% if salon.id_salon == solicitud.id_salon_preferido %}selected{% endif %}>{{ salon.nombre }} · {{ salon.capacidad_maxima }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="id_paquete_preferido">
+                                        <option value="">Sin preferencia</option>
+                                        {% for paquete in paquetes %}
+                                            <option value="{{ paquete.id_paquete }}" {% if paquete.id_paquete == solicitud.id_paquete_preferido %}selected{% endif %}>{{ paquete.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="estatus" required>
+                                        {% for estado in ["PENDIENTE", "ATENDIDA", "RECHAZADA", "CONVERTIDA"] %}
+                                            <option {% if estado == solicitud.estatus %}selected{% endif %}>{{ estado }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input name="observaciones" value="{{ solicitud.observaciones or '' }}" placeholder="Observaciones">
+                                    <button class="boton boton-chico" type="submit">Actualizar</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bloque">
         <h2>Proyectos activos</h2>
         <div class="tabla-contenedor">
             <table>
@@ -145,11 +193,23 @@
             <input name="nombre" placeholder="Nombre platillo" required>
             <textarea name="descripcion" rows="3" placeholder="Descripcion"></textarea>
             <input name="precio" type="number" min="0" step="0.01" placeholder="Precio" required>
+            <input name="costo_estimado" type="number" min="0" step="0.01" placeholder="Costo estimado" required>
             <input name="porciones_base" type="number" min="1" placeholder="Porciones base" required>
             <input name="categoria" placeholder="Categoria" required>
             <input name="tipo_dieta" placeholder="Tipo dieta">
-            <input name="ingrediente" placeholder="Primer ingrediente" required>
-            <input name="unidad_medida" placeholder="Unidad medida" required>
+            <select name="dificultad" required>
+                <option>BAJA</option>
+                <option selected>MEDIA</option>
+                <option>ALTA</option>
+            </select>
+            <select name="id_ingrediente_existente">
+                <option value="">Crear ingrediente nuevo</option>
+                {% for ingrediente in ingredientes %}
+                    <option value="{{ ingrediente.id_ingrediente }}">{{ ingrediente.nombre_ingrediente }} · {{ ingrediente.unidad_medida }}</option>
+                {% endfor %}
+            </select>
+            <input name="ingrediente" placeholder="Nuevo ingrediente">
+            <input name="unidad_medida" placeholder="Unidad medida">
             <input name="cantidad" type="number" min="0.001" step="0.001" placeholder="Cantidad" required>
             <input name="presentacion" placeholder="Presentacion">
             <input name="observacion" placeholder="Observacion">
@@ -178,4 +238,3 @@
     {% endif %}
 </section>
 {% endblock %}
-

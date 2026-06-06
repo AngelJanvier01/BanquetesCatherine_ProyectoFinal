@@ -2,6 +2,8 @@
 
 Proyecto final de Sistemas de Base de Datos II. Sistema web con Oracle Database para administrar solicitudes, clientes, proyectos de eventos, paquetes, pagos, salones, reportes y notificaciones.
 
+Incluye una consola auxiliar de demostracion que registra las sentencias SQL/PLSQL ejecutadas por el sitio y muestra una tabla con las primeras filas consultadas.
+
 ## Tecnologias
 
 - Oracle Database / SQL Developer / SQLcl
@@ -42,6 +44,8 @@ iniciar.bat
 
 El script busca un puerto libre desde `5000`, inicia Flask y abre el navegador.
 
+El puerto activo queda guardado en `.estado\puerto.txt`. Si `5000` esta ocupado, usara el siguiente libre.
+
 Para terminar:
 
 ```bat
@@ -81,6 +85,7 @@ sqlplus / as sysdba @database/98_instalar_local_sysdba.sql
 | GERENTE_ADMIN | admin.catherine | admin123 |
 | GERENTE | gerente.lucia | gerente123 |
 | CLIENTE | cliente.demo | cliente123 |
+| CHEF | chef.renata | gerente123 |
 
 ## Scripts SQL
 
@@ -108,26 +113,33 @@ Scripts principales:
 Abre tambien la consola auxiliar en otra ventana:
 
 ```txt
-http://127.0.0.1:5000/consola-sql
+http://127.0.0.1:PUERTO/consola-sql
 ```
 
-Esa vista muestra las consultas SQL, procedimientos PL/SQL, parametros seguros, filas devueltas, errores y commits/rollbacks que genera el sitio.
+Reemplaza `PUERTO` por el valor de `.estado\puerto.txt`.
 
-1. Ver catalogos publicos de platillos, complementos y salones.
-2. Crear una solicitud publica.
-3. Entrar como gerente.
-4. Convertir solicitud en proyecto con anticipo.
-5. Intentar convertir una solicitud con salon sin capacidad.
-6. Registrar pago y revisar saldo pendiente.
-7. Liquidar un evento y ver `finiquitado = S`.
-8. Entrar como cliente.
-9. Cambiar invitados en un evento permitido.
-10. Intentar cambiar invitados en evento con menos de 5 dias.
-11. Revisar reporte de ingredientes.
-12. Revisar cobranza 21 dias antes.
-13. Revisar platillos populares y menos demandados.
-14. Revisar historial del cliente.
-15. Revisar notificaciones generadas.
+Esa vista muestra las consultas SQL, procedimientos PL/SQL, parametros seguros, filas devueltas, muestra de resultados en tabla, errores y commits/rollbacks que genera el sitio.
+
+1. Ver inicio sin cargar catalogos.
+2. Abrir catalogos publicos separados: platillos, complementos y salones.
+3. Crear una solicitud desde el modal Agendar.
+4. Entrar como gerente.
+5. Modificar una solicitud propuesta por cliente.
+6. Convertir solicitud en proyecto con anticipo.
+7. Intentar convertir una solicitud con salon sin capacidad.
+8. Registrar pago y revisar saldo pendiente.
+9. Liquidar un evento y ver `finiquitado = S`.
+10. Entrar como cliente.
+11. Ver solicitudes, costos, ubicacion y paquetes visibles.
+12. Cambiar invitados en un evento permitido.
+13. Intentar cambiar invitados en evento con menos de 5 dias.
+14. Simular envio de invitacion y confirmar invitado.
+15. Entrar como chef y administrar recetas, ingredientes, dificultad y costos.
+16. Revisar reporte de ingredientes.
+17. Revisar cobranza 21 dias antes.
+18. Revisar platillos populares y menos demandados.
+19. Revisar historial del cliente.
+20. Revisar notificaciones generadas.
 
 ## Temas Del Semestre Cubiertos
 
