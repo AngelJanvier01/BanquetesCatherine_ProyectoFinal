@@ -27,7 +27,7 @@
                     <dl class="datos-mini">
                         <div><dt>Paquete</dt><dd>{{ proyecto.paquete }}</dd></div>
                         <div><dt>Invitados</dt><dd>{{ proyecto.numero_invitados }}</dd></div>
-                        <div><dt>Costo persona</dt><dd>${{ "%.2f"|format(proyecto.costo_por_persona or 0) }}</dd></div>
+                        <div><dt>Costo p/p</dt><dd>${{ "%.2f"|format(proyecto.costo_por_persona or 0) }}</dd></div>
                         <div><dt>Total</dt><dd>${{ "%.2f"|format(proyecto.total_estimado) }}</dd></div>
                     </dl>
                     <p class="texto-suave">Menu: {{ proyecto.platillos }}</p>
@@ -176,7 +176,7 @@
                             {{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}
                             <small>{{ paquete.platillos }}</small>
                         </span>
-                        <strong>${{ "%.2f"|format(paquete.precio_base) }}</strong>
+                        <strong>${{ "%.2f"|format(paquete.precio_base) }} p/p</strong>
                     </div>
                 {% endfor %}
             </div>

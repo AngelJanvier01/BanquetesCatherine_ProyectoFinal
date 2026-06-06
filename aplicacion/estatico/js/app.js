@@ -119,7 +119,7 @@ async function cargarOpcionesAgenda() {
     });
     paquetes.forEach((select) => {
         select.innerHTML = `<option value="">Sin preferencia</option>` + (datos.paquetes || []).map((paquete) =>
-            `<option value="${escaparHtml(paquete.id_paquete)}">${escaparHtml(paquete.nombre)} - $${escaparHtml(paquete.precio_base)}</option>`
+            `<option value="${escaparHtml(paquete.id_paquete)}">${escaparHtml(paquete.nombre)} - $${escaparHtml(paquete.precio_base)} p/p</option>`
         ).join("");
     });
     opcionesAgendaCargadas = true;
@@ -318,7 +318,7 @@ document.querySelectorAll("[data-receta-builder]").forEach((formulario) => {
 
     function actualizarPrecio() {
         const sugerido = Number(costo?.value || 0) * (1 + Number(margen?.value || 0) / 100);
-        if (resumen) resumen.textContent = `Precio sugerido: ${formatoMoneda(sugerido)}. Puedes capturar un precio manual si lo necesitas.`;
+        if (resumen) resumen.textContent = `Precio sugerido por persona: ${formatoMoneda(sugerido)}. Puedes capturar un precio manual si lo necesitas.`;
         if (precio && !precio.value) precio.placeholder = formatoMoneda(sugerido);
     }
 
@@ -332,7 +332,7 @@ document.querySelectorAll("[data-receta-builder]").forEach((formulario) => {
         const fila = document.createElement("div");
         fila.className = "item-constructor";
         fila.innerHTML = `
-            <span>${escaparHtml(nombre)} - ${escaparHtml(cantidad)} ${escaparHtml(unidad)}</span>
+            <span>${escaparHtml(nombre)} - ${escaparHtml(cantidad)} ${escaparHtml(unidad)} por persona</span>
             <input type="hidden" name="ingredientes_receta" value="${escaparHtml(id)}">
             <input type="hidden" name="cantidades_receta" value="${escaparHtml(cantidad)}">
             <button type="button" data-remover-elemento>x</button>`;

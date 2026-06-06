@@ -52,6 +52,55 @@ Para terminar:
 detener.bat
 ```
 
+## Consultas Manuales En VS Code
+
+Puedes exponer la base desde la terminal integrada de VS Code sin abrir SQL Developer.
+
+Opcion rapida desde terminal:
+
+```bat
+abrir_sql_manual.bat
+```
+
+Eso abre SQLPlus dentro del esquema `BANQUETES_CATHERINE`. Ahi puedes escribir consultas manuales y terminar cada una con `;`.
+
+Consultas seguras para responder al profesor:
+
+```sql
+SELECT * FROM vw_estado_pago_proyecto WHERE ROWNUM <= 5;
+
+SELECT folio_proyecto, nombre_evento, cliente, saldo_pendiente
+FROM vw_eventos_no_finiquitados_21
+ORDER BY fecha_evento;
+
+SELECT platillo, proyectos_demandados
+FROM vw_popularidad_platillos
+ORDER BY proyectos_demandados DESC;
+
+SELECT nombre, precio_base AS precio_por_persona, platillos, complementos
+FROM vw_paquete_resumen
+ORDER BY nombre;
+
+SELECT fn_total_estimado_evento(120, 2, 1) AS total_evento
+FROM dual;
+```
+
+Si estas en VS Code tambien puedes usar `Terminal > Run Task` y elegir:
+
+- `BD: abrir SQL manual`
+- `BD: ejecutar consultas demo`
+- `BD: reinstalar datos demo`
+- `App: iniciar`
+- `App: detener`
+
+Para ejecutar una bateria completa de consultas:
+
+```bat
+ejecutar_consultas_demo.bat
+```
+
+El resultado queda guardado en `.estado\consultas_demo.log`.
+
 ## Configuracion
 
 Edita `.env` si tu Oracle usa otro host, puerto o servicio:

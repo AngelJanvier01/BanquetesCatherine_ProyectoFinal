@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "BD: abrir SQL manual",
+            "type": "shell",
+            "command": "${workspaceFolder}\\abrir_sql_manual.bat",
+            "problemMatcher": []
+        },
+        {
+            "label": "BD: ejecutar consultas demo",
+            "type": "shell",
+            "command": "${workspaceFolder}\\ejecutar_consultas_demo.bat",
+            "problemMatcher": []
+        },
+        {
+            "label": "BD: reinstalar datos demo",
+            "type": "shell",
+            "command": "${workspaceFolder}\\reinstalar_base_datos.bat",
+            "problemMatcher": []
+        },
+        {
+            "label": "App: iniciar",
+            "type": "shell",
+            "command": "${workspaceFolder}\\iniciar.bat",
+            "problemMatcher": []
+        },
+        {
+            "label": "App: detener",
+            "type": "shell",
+            "command": "${workspaceFolder}\\detener.bat",
+            "problemMatcher": []
+        }
+    ]
+}

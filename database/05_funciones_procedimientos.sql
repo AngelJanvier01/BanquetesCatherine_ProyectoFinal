@@ -670,7 +670,7 @@ BEGIN
         p_descripcion,
         p_precio,
         p_costo_estimado,
-        p_porciones_base,
+        1,
         p_categoria,
         p_tipo_dieta,
         UPPER(TRIM(p_dificultad))

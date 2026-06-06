@@ -24,14 +24,14 @@
                 <img class="imagen-catalogo" src="{{ url_for('static', filename=platillo.foto_url or 'img/hero-banquetes.png') }}" alt="{{ platillo.nombre }}">
                 <div class="tarjeta-cabecera">
                     <span class="pildora">{{ platillo.categoria }}</span>
-                    <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
+                    <strong>${{ "%.2f"|format(platillo.precio) }} p/p</strong>
                 </div>
                 <h3>{{ platillo.nombre }}</h3>
                 <p>{{ platillo.descripcion }}</p>
                 <dl class="datos-mini">
-                    <div><dt>Precio</dt><dd>${{ "%.2f"|format(platillo.precio) }}</dd></div>
+                    <div><dt>Precio</dt><dd>${{ "%.2f"|format(platillo.precio) }} por persona</dd></div>
                     <div><dt>Estilo</dt><dd>{{ platillo.tipo_dieta }}</dd></div>
-                    <div><dt>Porciones</dt><dd>{{ platillo.porciones_base }}</dd></div>
+                    <div><dt>Base</dt><dd>1 persona</dd></div>
                     <div><dt>Categoria</dt><dd>{{ platillo.categoria }}</dd></div>
                 </dl>
             </article>

@@ -46,7 +46,8 @@ CREATE TABLE PLATILLO (
     descripcion VARCHAR2(500),
     precio NUMBER(10,2) NOT NULL,
     costo_estimado NUMBER(10,2) DEFAULT 0 NOT NULL,
-    porciones_base NUMBER DEFAULT 4 NOT NULL,
+    -- El proyecto maneja recetas unitarias: las cantidades son por 1 persona.
+    porciones_base NUMBER DEFAULT 1 NOT NULL,
     categoria VARCHAR2(60),
     tipo_dieta VARCHAR2(60),
     dificultad VARCHAR2(20) DEFAULT 'MEDIA' NOT NULL,

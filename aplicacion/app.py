@@ -925,7 +925,7 @@ def crear_platillo():
                     request.form["descripcion"],
                     precio,
                     costo_estimado,
-                    int(request.form["porciones_base"]),
+                    1,
                     request.form["categoria"],
                     request.form["tipo_dieta"],
                     request.form.get("dificultad") or "MEDIA",

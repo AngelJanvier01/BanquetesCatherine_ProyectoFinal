@@ -19,7 +19,10 @@
                     <small>{{ complemento.descripcion }}</small>
                     <small>{{ complemento.tipo_complemento }} - {{ complemento.tipo_cobro }}</small>
                 </span>
-                <strong>${{ "%.2f"|format(complemento.precio) }}</strong>
+                <strong>
+                    ${{ "%.2f"|format(complemento.precio) }}
+                    {% if complemento.tipo_cobro == 'POR_PERSONA' %}p/p{% else %}por evento{% endif %}
+                </strong>
             </div>
         {% endfor %}
     </div>

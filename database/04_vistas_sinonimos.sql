@@ -232,7 +232,7 @@ SELECT
     i.id_ingrediente,
     i.nombre_ingrediente,
     i.unidad_medida,
-    SUM(pi.cantidad * pp.cantidad * CEIL(pe.numero_invitados / pl.porciones_base)) AS cantidad_necesaria
+    SUM(pi.cantidad * pp.cantidad * pe.numero_invitados) AS cantidad_necesaria
 FROM PROYECTO_EVENTO pe
 INNER JOIN PAQUETE p ON p.id_paquete = pe.id_paquete
 INNER JOIN PAQUETE_PLATILLO pp ON pp.id_paquete = p.id_paquete

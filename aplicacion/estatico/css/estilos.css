@@ -608,7 +608,7 @@ a {
 
 .opciones-login {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 12px;
 }
 
@@ -639,6 +639,32 @@ a {
 .opciones-login span {
     color: var(--suave);
     font-size: 0.92rem;
+}
+
+.acceso-discreto {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--suave);
+    font-size: 0.82rem;
+}
+
+.acceso-discreto button {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--verde);
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.acceso-discreto button:hover,
+.acceso-discreto button:focus {
+    color: var(--dorado);
 }
 
 .boton {

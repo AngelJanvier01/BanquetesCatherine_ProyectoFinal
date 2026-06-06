@@ -2,7 +2,7 @@
 -- Ejecutar conectado como BANQUETES_CATHERINE despues de instalar datos.
 
 -- SELECT, WHERE y ORDER BY.
-SELECT nombre, precio, categoria
+SELECT nombre, precio AS precio_por_persona, categoria
 FROM PLATILLO
 WHERE activo = 'S'
 ORDER BY precio DESC;
@@ -101,7 +101,7 @@ FROM vw_estado_pago_proyecto
 ORDER BY id_proyecto;
 
 -- Paquetes armados con platillos y complementos existentes.
-SELECT nombre, tipo_paquete, precio_base, complementos_persona, complementos_evento, platillos, complementos
+SELECT nombre, tipo_paquete, precio_base AS precio_por_persona, complementos_persona, complementos_evento, platillos, complementos
 FROM vw_paquete_resumen
 ORDER BY personalizado DESC, nombre;
 

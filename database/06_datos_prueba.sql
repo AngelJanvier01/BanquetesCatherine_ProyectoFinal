@@ -119,6 +119,21 @@ INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 32
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 33, 1000);
 INSERT INTO PLATILLO_INGREDIENTE VALUES (sq_platillo_ingrediente.NEXTVAL, 12, 34, 20);
 
+-- Normalizacion del proyecto: las recetas, costos y precios se manejan por persona.
+-- Las cantidades anteriores se capturaron como receta base; aqui quedan convertidas a unidad individual.
+UPDATE PLATILLO_INGREDIENTE pi
+SET cantidad = ROUND(
+    cantidad / (
+        SELECT pl.porciones_base
+        FROM PLATILLO pl
+        WHERE pl.id_platillo = pi.id_platillo
+    ),
+    3
+);
+
+UPDATE PLATILLO
+SET porciones_base = 1;
+
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 1, 1, 'Cortar carne y verduras en piezas uniformes.', 'Mantener tamanio similar.');
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 1, 2, 'Armar brochetas y asar.', 'Revisar termino de carne.');
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 2, 1, 'Tatemar chiles y limpiar semillas.', NULL);
