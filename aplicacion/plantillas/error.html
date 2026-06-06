@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titulo %}Error{% endblock %}
+
+{% block contenido %}
+<section class="pantalla-centrada">
+    <div class="formulario formulario-login">
+        <h1>Error Oracle</h1>
+        <p>{{ mensaje }}</p>
+        <a class="boton boton-oscuro" href="{{ url_for('inicio') }}">Volver</a>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block titulo %}Banquetes Catherine{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    <header class="barra">
+        <a class="marca" href="{{ url_for('inicio') }}">Banquetes Catherine</a>
+        <nav class="navegacion">
+            <a href="{{ url_for('inicio') }}#platillos">Platillos</a>
+            <a href="{{ url_for('inicio') }}#salones">Salones</a>
+            <a href="{{ url_for('inicio') }}#solicitud">Solicitud</a>
+            {% if session.get("rol") == "CLIENTE" %}
+                <a href="{{ url_for('panel_cliente') }}">Mi panel</a>
+            {% elif session.get("rol") in ["GERENTE", "GERENTE_ADMIN"] %}
+                <a href="{{ url_for('panel_gerente') }}">Gerencia</a>
+                <a href="{{ url_for('reportes') }}">Reportes</a>
+            {% endif %}
+            {% if session.get("id_usuario") %}
+                <a href="{{ url_for('salir') }}">Salir</a>
+            {% else %}
+                <a class="boton boton-oscuro" href="{{ url_for('login') }}">Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            <section class="mensajes">
+                {% for categoria, mensaje in mensajes %}
+                    <p class="mensaje {{ categoria }}">{{ mensaje }}</p>
+                {% endfor %}
+            </section>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block contenido %}{% endblock %}
+    </main>
+
+    <footer class="pie">
+        <span>Proyecto final Base de Datos II</span>
+        <span>Oracle + Flask</span>
+    </footer>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
+

@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block titulo %}Reportes{% endblock %}
+
+{% block contenido %}
+<section class="contenedor seccion">
+    <div class="encabezado-seccion">
+        <h1>Reportes</h1>
+        <p>Ingredientes, cobranza, popularidad e historial.</p>
+    </div>
+
+    <form class="formulario-linea filtros" method="get">
+        <label>Inicio <input name="fecha_inicio" type="date" value="{{ fecha_inicio or '' }}"></label>
+        <label>Fin <input name="fecha_fin" type="date" value="{{ fecha_fin or '' }}"></label>
+        <button class="boton boton-oscuro" type="submit">Filtrar ingredientes</button>
+    </form>
+
+    <section class="bloque">
+        <h2>Ingredientes necesarios</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Ingrediente</th><th>Unidad</th><th>Cantidad</th></tr></thead>
+                <tbody>
+                    {% for fila in ingredientes %}
+                        <tr>
+                            <td>{{ fila.nombre_ingrediente }}</td>
+                            <td>{{ fila.unidad_medida }}</td>
+                            <td>{{ "%.3f"|format(fila.cantidad_necesaria) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bloque">
+        <h2>Cobranza 21 dias antes</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Evento</th><th>Cliente</th><th>Fecha</th><th>Dias</th><th>Saldo</th></tr></thead>
+                <tbody>
+                    {% for fila in cobranza %}
+                        <tr>
+                            <td>{{ fila.nombre_evento }}</td>
+                            <td>{{ fila.cliente }}</td>
+                            <td>{{ fila.fecha_evento.strftime("%Y-%m-%d") if fila.fecha_evento else "" }}</td>
+                            <td>{{ fila.dias_restantes }}</td>
+                            <td>${{ "%.2f"|format(fila.saldo_pendiente) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bloque">
+        <h2>Popularidad de platillos</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Platillo</th><th>Categoria</th><th>Proyectos</th><th>Realizados</th><th>Activos</th></tr></thead>
+                <tbody>
+                    {% for fila in popularidad %}
+                        <tr>
+                            <td>{{ fila.platillo }}</td>
+                            <td>{{ fila.categoria }}</td>
+                            <td>{{ fila.proyectos_demandados }}</td>
+                            <td>{{ fila.usos_realizados }}</td>
+                            <td>{{ fila.usos_activos }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bloque">
+        <h2>Historial de cliente</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead><tr><th>Cliente</th><th>Evento</th><th>Fecha</th><th>Paquete</th><th>Platillos</th><th>Total</th><th>Estatus</th></tr></thead>
+                <tbody>
+                    {% for fila in historial %}
+                        <tr>
+                            <td>{{ fila.cliente }}</td>
+                            <td>{{ fila.nombre_evento }}</td>
+                            <td>{{ fila.fecha_evento.strftime("%Y-%m-%d") if fila.fecha_evento else "" }}</td>
+                            <td>{{ fila.paquete }}</td>
+                            <td>{{ fila.platillos }}</td>
+                            <td>${{ "%.2f"|format(fila.total_estimado) }}</td>
+                            <td>{{ fila.estatus }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</section>
+{% endblock %}
+

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}Panel cliente{% endblock %}
+
+{% block contenido %}
+<section class="contenedor seccion">
+    <div class="encabezado-seccion">
+        <h1>Panel cliente</h1>
+        <p>Proyectos activos y paquetes disponibles.</p>
+    </div>
+
+    <div class="tabla-contenedor">
+        <table>
+            <thead>
+                <tr>
+                    <th>Evento</th>
+                    <th>Fecha</th>
+                    <th>Salon</th>
+                    <th>Paquete</th>
+                    <th>Invitados</th>
+                    <th>Saldo</th>
+                    <th>Cambio</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for proyecto in proyectos %}
+                    <tr>
+                        <td>{{ proyecto.nombre_evento }}</td>
+                        <td>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }}</td>
+                        <td>{{ proyecto.salon }}</td>
+                        <td>{{ proyecto.paquete }}</td>
+                        <td>{{ proyecto.numero_invitados }}</td>
+                        <td>${{ "%.2f"|format(proyecto.saldo_pendiente) }}</td>
+                        <td>
+                            {% if proyecto.puede_cambiar_invitados == "S" %}
+                                <form class="formulario-linea" method="post" action="{{ url_for('actualizar_invitados', id_proyecto=proyecto.id_proyecto) }}">
+                                    <input name="numero_invitados" type="number" min="1" value="{{ proyecto.numero_invitados }}" required>
+                                    <button class="boton boton-chico" type="submit">Guardar</button>
+                                </form>
+                            {% else %}
+                                <span class="pildora alerta">Bloqueado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="dos-columnas">
+        <section>
+            <h2>Paquetes visibles para ti</h2>
+            <div class="lista-precios">
+                {% for paquete in paquetes %}
+                    <div>
+                        <span>{{ paquete.nombre }} {% if paquete.personalizado == "S" %}<em>personalizado</em>{% endif %}</span>
+                        <strong>${{ "%.2f"|format(paquete.precio_base) }}</strong>
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+        <section>
+            <h2>Notificaciones</h2>
+            <div class="notificaciones">
+                {% for notificacion in notificaciones %}
+                    <article>
+                        <strong>{{ notificacion.asunto }}</strong>
+                        <p>{{ notificacion.mensaje }}</p>
+                    </article>
+                {% else %}
+                    <p class="texto-suave">Sin notificaciones.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</section>
+{% endblock %}
+

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titulo %}Login · Banquetes Catherine{% endblock %}
+
+{% block contenido %}
+<section class="pantalla-centrada">
+    <form class="formulario formulario-login" method="post">
+        <h1>Acceso</h1>
+        <label>Usuario
+            <input name="nombre_usuario" required autocomplete="username">
+        </label>
+        <label>Contrasena
+            <input name="contrasena" type="password" required autocomplete="current-password">
+        </label>
+        <button class="boton boton-oscuro" type="submit">Entrar</button>
+        <p class="texto-suave">Demo: admin.catherine/admin123, gerente.lucia/gerente123, cliente.demo/cliente123</p>
+    </form>
+</section>
+{% endblock %}
+

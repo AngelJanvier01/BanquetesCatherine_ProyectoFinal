@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block titulo %}Banquetes Catherine{% endblock %}
+
+{% block contenido %}
+<section class="hero">
+    <div class="hero-contenido">
+        <p class="etiqueta">Eventos sociales, empresariales y bodas</p>
+        <h1>Banquetes Catherine</h1>
+        <p>Menus elegantes, salones con convenio y atencion personalizada para cada evento.</p>
+        <a class="boton boton-claro" href="#solicitud">Solicitar servicio</a>
+    </div>
+</section>
+
+{% if error_bd %}
+    <section class="contenedor">
+        <p class="mensaje error">No hay conexion con Oracle: {{ error_bd }}</p>
+    </section>
+{% endif %}
+
+<section id="platillos" class="seccion contenedor">
+    <div class="encabezado-seccion">
+        <h2>Platillos</h2>
+        <p>Catalogo publico con precio por platillo.</p>
+    </div>
+    <div class="rejilla tarjetas">
+        {% for platillo in platillos %}
+            <article class="tarjeta">
+                <span class="pildora">{{ platillo.categoria }}</span>
+                <h3>{{ platillo.nombre }}</h3>
+                <p>{{ platillo.descripcion }}</p>
+                <strong>${{ "%.2f"|format(platillo.precio) }}</strong>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="seccion banda">
+    <div class="contenedor">
+        <div class="encabezado-seccion">
+            <h2>Complementos</h2>
+            <p>Extras disponibles para personalizar el servicio.</p>
+        </div>
+        <div class="lista-precios">
+            {% for complemento in complementos %}
+                <div>
+                    <span>{{ complemento.nombre }}</span>
+                    <strong>${{ "%.2f"|format(complemento.precio) }}</strong>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section id="salones" class="seccion contenedor">
+    <div class="encabezado-seccion">
+        <h2>Salones con convenio</h2>
+        <p>Capacidad, renta y contacto de instalacion.</p>
+    </div>
+    <div class="rejilla tarjetas">
+        {% for salon in salones %}
+            <article class="tarjeta">
+                <span class="pildora">{{ salon.capacidad_maxima }} personas</span>
+                <h3>{{ salon.nombre }}</h3>
+                <p>{{ salon.direccion }}</p>
+                <p>{{ salon.contacto_instalacion }} · {{ salon.telefono_contacto }}</p>
+                <strong>${{ "%.2f"|format(salon.costo_renta) }}</strong>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="solicitud" class="seccion banda">
+    <div class="contenedor formulario-dos-columnas">
+        <div>
+            <h2>Solicitud de servicio</h2>
+            <p>La solicitud queda pendiente hasta que un gerente confirme el servicio y registre anticipo.</p>
+        </div>
+        <form class="formulario" method="post" action="{{ url_for('crear_solicitud') }}">
+            <label>Nombre contacto
+                <input name="nombre_contacto" required maxlength="160">
+            </label>
+            <label>Correo
+                <input name="correo" type="email" required maxlength="120">
+            </label>
+            <label>Telefono
+                <input name="telefono" maxlength="30">
+            </label>
+            <label>Fecha evento
+                <input name="fecha_evento" type="date" required>
+            </label>
+            <label>Invitados
+                <input name="numero_invitados" type="number" min="1" required>
+            </label>
+            <label>Salon preferido
+                <select name="id_salon_preferido">
+                    <option value="">Sin preferencia</option>
+                    {% for salon in salones %}
+                        <option value="{{ salon.id_salon }}">{{ salon.nombre }} · {{ salon.capacidad_maxima }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label>Paquete preferido
+                <select name="id_paquete_preferido">
+                    <option value="">Sin preferencia</option>
+                    {% for paquete in paquetes %}
+                        <option value="{{ paquete.id_paquete }}">{{ paquete.nombre }} · ${{ "%.2f"|format(paquete.precio_base) }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label class="ancho-total">Mensaje
+                <textarea name="mensaje" rows="4" maxlength="1000"></textarea>
+            </label>
+            <button class="boton boton-oscuro" type="submit">Enviar solicitud</button>
+        </form>
+    </div>
+</section>
+{% endblock %}
+

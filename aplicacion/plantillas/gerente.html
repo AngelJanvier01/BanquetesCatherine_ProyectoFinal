@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+{% block titulo %}Panel gerente{% endblock %}
+
+{% block contenido %}
+<section class="contenedor seccion">
+    <div class="encabezado-seccion">
+        <h1>Panel gerente</h1>
+        <p>Solicitudes, proyectos, pagos y catalogos.</p>
+    </div>
+
+    <section class="bloque">
+        <h2>Solicitudes pendientes</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Contacto</th>
+                        <th>Fecha</th>
+                        <th>Invitados</th>
+                        <th>Salon</th>
+                        <th>Convertir</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for solicitud in solicitudes %}
+                        <tr>
+                            <td>{{ solicitud.nombre_contacto }}<br><span>{{ solicitud.correo }}</span></td>
+                            <td>{{ solicitud.fecha_evento.strftime("%Y-%m-%d") if solicitud.fecha_evento else "" }}</td>
+                            <td>{{ solicitud.numero_invitados }}</td>
+                            <td>{{ solicitud.salon_preferido }}</td>
+                            <td>
+                                <form class="formulario compacto" method="post" action="{{ url_for('convertir_solicitud', id_solicitud=solicitud.id_solicitud) }}">
+                                    <select name="id_cliente" required>
+                                        {% for cliente in clientes %}
+                                            <option value="{{ cliente.id_cliente }}">{{ cliente.cliente }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="id_gerente" required>
+                                        {% for gerente in gerentes %}
+                                            <option value="{{ gerente.id_gerente }}">{{ gerente.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="id_salon" required>
+                                        {% for salon in salones %}
+                                            <option value="{{ salon.id_salon }}">{{ salon.nombre }} · {{ salon.capacidad_maxima }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <select name="id_paquete" required>
+                                        {% for paquete in paquetes %}
+                                            <option value="{{ paquete.id_paquete }}">{{ paquete.nombre }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input name="nombre_evento" placeholder="Nombre evento" required>
+                                    <input name="total_estimado" type="number" min="1" step="0.01" placeholder="Total" required>
+                                    <input name="anticipo" type="number" min="1" step="0.01" placeholder="Anticipo" required>
+                                    <input name="metodo_pago" placeholder="Metodo" required>
+                                    <input name="referencia" placeholder="Referencia" required>
+                                    <button class="boton boton-chico" type="submit">Crear</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr><td colspan="5">No hay solicitudes pendientes.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="bloque">
+        <h2>Proyectos activos</h2>
+        <div class="tabla-contenedor">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Evento</th>
+                        <th>Cliente</th>
+                        <th>Fecha</th>
+                        <th>Invitados</th>
+                        <th>Saldo</th>
+                        <th>Finiquitado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for proyecto in proyectos %}
+                        <tr>
+                            <td>{{ proyecto.nombre_evento }}</td>
+                            <td>{{ proyecto.cliente }}</td>
+                            <td>{{ proyecto.fecha_evento.strftime("%Y-%m-%d") if proyecto.fecha_evento else "" }}</td>
+                            <td>{{ proyecto.numero_invitados }}</td>
+                            <td>${{ "%.2f"|format(proyecto.saldo_pendiente) }}</td>
+                            <td>{{ proyecto.finiquitado }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <div class="dos-columnas">
+        <form class="formulario" method="post" action="{{ url_for('registrar_pago') }}">
+            <h2>Registrar pago</h2>
+            <input name="id_proyecto" type="number" placeholder="Proyecto" required>
+            <input name="monto" type="number" min="1" step="0.01" placeholder="Monto" required>
+            <select name="tipo_pago" required>
+                <option>ANTICIPO</option>
+                <option>ABONO</option>
+                <option>LIQUIDACION</option>
+                <option>AJUSTE</option>
+            </select>
+            <input name="metodo_pago" placeholder="Metodo de pago" required>
+            <input name="referencia" placeholder="Referencia unica" required>
+            <button class="boton boton-oscuro" type="submit">Registrar</button>
+        </form>
+
+        <form class="formulario" method="post" action="{{ url_for('cancelar_evento') }}">
+            <h2>Cancelar evento</h2>
+            <input name="id_proyecto" type="number" placeholder="Proyecto" required>
+            <textarea name="motivo" rows="4" placeholder="Motivo" required></textarea>
+            <button class="boton boton-oscuro" type="submit">Cancelar</button>
+        </form>
+    </div>
+
+    <div class="dos-columnas">
+        <form class="formulario" method="post" action="{{ url_for('crear_paquete_personalizado') }}">
+            <h2>Paquete personalizado</h2>
+            <select name="id_cliente" required>
+                {% for cliente in clientes %}
+                    <option value="{{ cliente.id_cliente }}">{{ cliente.cliente }}</option>
+                {% endfor %}
+            </select>
+            <input name="nombre" placeholder="Nombre" required>
+            <textarea name="descripcion" rows="3" placeholder="Descripcion"></textarea>
+            <input name="precio_base" type="number" min="1" step="0.01" placeholder="Precio base" required>
+            <div class="opciones">
+                {% for platillo in platillos %}
+                    <label><input type="checkbox" name="platillos" value="{{ platillo.id_platillo }}"> {{ platillo.nombre }}</label>
+                {% endfor %}
+            </div>
+            <button class="boton boton-oscuro" type="submit">Crear paquete</button>
+        </form>
+
+        <form class="formulario" method="post" action="{{ url_for('crear_platillo') }}">
+            <h2>Alta de platillo</h2>
+            <input name="nombre" placeholder="Nombre platillo" required>
+            <textarea name="descripcion" rows="3" placeholder="Descripcion"></textarea>
+            <input name="precio" type="number" min="0" step="0.01" placeholder="Precio" required>
+            <input name="porciones_base" type="number" min="1" placeholder="Porciones base" required>
+            <input name="categoria" placeholder="Categoria" required>
+            <input name="tipo_dieta" placeholder="Tipo dieta">
+            <input name="ingrediente" placeholder="Primer ingrediente" required>
+            <input name="unidad_medida" placeholder="Unidad medida" required>
+            <input name="cantidad" type="number" min="0.001" step="0.001" placeholder="Cantidad" required>
+            <input name="presentacion" placeholder="Presentacion">
+            <input name="observacion" placeholder="Observacion">
+            <textarea name="instruccion" rows="2" placeholder="Primer paso" required></textarea>
+            <input name="detalle_instruccion" placeholder="Detalle del paso">
+            <button class="boton boton-oscuro" type="submit">Guardar platillo</button>
+        </form>
+    </div>
+
+    {% if session.get("rol") == "GERENTE_ADMIN" %}
+        <form class="formulario bloque" method="post" action="{{ url_for('cambiar_estatus_gerente') }}">
+            <h2>Estatus de gerentes</h2>
+            <select name="id_gerente" required>
+                {% for gerente in gerentes %}
+                    <option value="{{ gerente.id_gerente }}">{{ gerente.nombre }} · {{ gerente.estatus }}</option>
+                {% endfor %}
+            </select>
+            <select name="estatus" required>
+                <option>ACTIVO</option>
+                <option>VACACIONES</option>
+                <option>INACTIVO</option>
+                <option>BAJA</option>
+            </select>
+            <button class="boton boton-oscuro" type="submit">Actualizar gerente</button>
+        </form>
+    {% endif %}
+</section>
+{% endblock %}
+
