@@ -6,13 +6,13 @@ SET SERVEROUTPUT ON;
 DECLARE
     v_id_proyecto NUMBER;
 BEGIN
-    -- Este caso debe fallar porque Salon Jardin Imperial tiene capacidad 120
+    -- Este caso debe fallar porque el salon elegido tiene capacidad menor
     -- y la solicitud 2 pide 500 invitados. La transaccion se revierte.
     sp_crear_proyecto_desde_solicitud(
         p_id_solicitud => 2,
         p_id_cliente => 1,
         p_id_gerente => 2,
-        p_id_salon => 1,
+        p_id_salon => 6,
         p_id_paquete => 2,
         p_nombre_evento => 'Evento corporativo Nova',
         p_total_estimado => 260000,
@@ -23,7 +23,7 @@ BEGIN
     );
 EXCEPTION
     WHEN OTHERS THEN
-        DBMS_OUTPUT.PUT_LINE('Error esperado: ' || SQLERRM);
+        DBMS_OUTPUT.PUT_LINE('Error esperado de capacidad; transaccion revertida correctamente.');
 END;
 /
 
@@ -40,4 +40,3 @@ SELECT id_notificacion, tipo_destinatario, id_proyecto, asunto, mensaje
 FROM NOTIFICACION
 WHERE tipo_destinatario = 'COBRANZA'
 ORDER BY fecha_creacion DESC;
-

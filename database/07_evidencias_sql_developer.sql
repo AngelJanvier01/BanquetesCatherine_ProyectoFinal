@@ -140,7 +140,10 @@ CREATE TABLE tmp_evidencia_dml (
     monto NUMBER(10,2)
 );
 
-INSERT INTO tmp_evidencia_dml VALUES (1, 'Registro inicial', 100);
+ALTER TABLE tmp_evidencia_dml ADD observacion VARCHAR2(120);
+
+INSERT INTO tmp_evidencia_dml (id, descripcion, monto)
+VALUES (1, 'Registro inicial', 100);
 COMMIT;
 
 SAVEPOINT antes_update;

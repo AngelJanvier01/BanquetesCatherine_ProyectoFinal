@@ -56,6 +56,33 @@ detener.bat
 
 Puedes exponer la base desde la terminal integrada de VS Code sin abrir SQL Developer.
 
+Si el profesor pide usar SQL Developer, ejecuta:
+
+```bat
+abrir_sql_developer.bat
+```
+
+Datos de conexion:
+
+```txt
+Name: Banquetes Catherine
+Username: BANQUETES_CATHERINE
+Password: Catherine2026
+Connection Type: Advanced
+Custom JDBC URL:
+jdbc:oracle:thin:@(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SERVER=SHARED)(SERVICE_NAME=xepdb1)))
+```
+
+En esta instalacion de Oracle XE, la conexion `Basic` puede fallar con `ORA-12518`. Usa `Advanced` con el URL anterior.
+
+Archivo maestro para abrir en una hoja de trabajo:
+
+```txt
+ProyectoFinal_BanquetesCatherine_SQLDeveloper.sql
+```
+
+Ese archivo contiene DDL, secuencias, indices, vistas, sinonimos, funciones, procedimientos, datos, transacciones y consultas de reporte.
+
 Opcion rapida desde terminal:
 
 ```bat
