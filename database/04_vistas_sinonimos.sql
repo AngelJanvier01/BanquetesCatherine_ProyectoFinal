@@ -20,6 +20,42 @@ SELECT
 FROM PLATILLO pl
 WHERE pl.activo = 'S';
 
+CREATE OR REPLACE VIEW vw_recetario_catherine AS
+SELECT
+    pr.id_publicacion,
+    pr.id_platillo,
+    INITCAP(pl.nombre) AS nombre,
+    pr.titulo_publico,
+    pl.descripcion,
+    pr.historia,
+    pl.categoria,
+    pl.tipo_dieta,
+    pl.dificultad,
+    pl.foto_url,
+    pl.porciones_base,
+    pr.estatus,
+    pr.destacado,
+    pr.fecha_publicacion,
+    pr.fecha_actualizacion,
+    (
+        SELECT COUNT(1)
+        FROM PLATILLO_INGREDIENTE pi
+        WHERE pi.id_platillo = pl.id_platillo
+    ) AS numero_ingredientes,
+    (
+        SELECT COUNT(1)
+        FROM INSTRUCCION inst
+        WHERE inst.id_platillo = pl.id_platillo
+    ) AS numero_pasos
+FROM PUBLICACION_RECETA pr
+INNER JOIN PLATILLO pl ON pl.id_platillo = pr.id_platillo
+WHERE pl.activo = 'S';
+
+CREATE OR REPLACE VIEW vw_recetario_publico AS
+SELECT *
+FROM vw_recetario_catherine
+WHERE estatus = 'PUBLICADA';
+
 CREATE OR REPLACE VIEW vw_complementos_publicos AS
 SELECT
     id_complemento,
@@ -371,6 +407,7 @@ LEFT JOIN INSTRUCCION inst ON inst.id_platillo = pl.id_platillo
 WHERE pl.activo = 'S';
 
 CREATE OR REPLACE SYNONYM cat_platillos FOR vw_platillos_publicos;
+CREATE OR REPLACE SYNONYM cat_recetario FOR vw_recetario_publico;
 CREATE OR REPLACE SYNONYM cat_complementos FOR vw_complementos_publicos;
 CREATE OR REPLACE SYNONYM cat_salones FOR vw_salones_publicos;
 CREATE OR REPLACE SYNONYM rep_cobranza FOR vw_eventos_no_finiquitados_21;

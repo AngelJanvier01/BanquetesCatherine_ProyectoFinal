@@ -1,6 +1,7 @@
 -- ============================================================================
 -- PROYECTO FINAL SISTEMAS DE BASE DE DATOS II
--- BANQUETES CATHERINE
+-- CATHERINE: BANQUETES Y RECETARIO
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 -- Archivo maestro para hoja de trabajo en Oracle SQL Developer.
 --
 -- Conexion recomendada:
@@ -14,7 +15,7 @@
 -- 1. Para reinstalar todo el esquema demo, ejecuta el archivo completo con F5.
 -- 2. Para solo demostrar, selecciona una consulta o bloque y usa Ctrl+Enter.
 -- 3. La limpieza solo borra objetos del esquema BANQUETES_CATHERINE.
--- 4. Las recetas, platillos, paquetes y costos se manejan por persona.
+-- 4. Banquetes y recetario comparten recetas, ingredientes e instrucciones.
 -- ============================================================================
 
 SET DEFINE OFF;
@@ -60,7 +61,7 @@ BEGIN
         WHERE table_name IN (
             'NOTIFICACION', 'CORTESIA_EVENTO', 'INVITADO_EVENTO', 'PAGO', 'PROYECTO_COMPLEMENTO', 'PROYECTO_EVENTO',
             'SOLICITUD_SERVICIO', 'PAQUETE_PLATILLO', 'PAQUETE_COMPLEMENTO', 'PAQUETE', 'SALON',
-            'COMPLEMENTO', 'INSTRUCCION', 'PLATILLO_INGREDIENTE', 'INGREDIENTE',
+            'COMPLEMENTO', 'PUBLICACION_RECETA', 'INSTRUCCION', 'PLATILLO_INGREDIENTE', 'INGREDIENTE',
             'PLATILLO', 'GERENTE', 'CLIENTE', 'USUARIO'
         )
         AND owner = SYS_CONTEXT('USERENV', 'CURRENT_SCHEMA')
@@ -93,12 +94,13 @@ END;
 
 
 -- ============================================================================
--- 01 DDL - TABLAS Y RESTRICCIONES
+-- 02 ESQUEMA RELACIONAL
 -- Archivo fuente: database\02_schema.sql
 -- ============================================================================
 
 -- Esquema principal para Banquetes Catherine.
 -- Ejecutar conectado como BANQUETES_CATHERINE.
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 
 CREATE TABLE USUARIO (
     id_usuario NUMBER PRIMARY KEY,
@@ -189,6 +191,21 @@ CREATE TABLE INSTRUCCION (
     CONSTRAINT fk_inst_platillo FOREIGN KEY (id_platillo) REFERENCES PLATILLO(id_platillo),
     CONSTRAINT uq_inst_paso UNIQUE (id_platillo, numero_paso),
     CONSTRAINT ck_inst_paso CHECK (numero_paso > 0)
+);
+
+CREATE TABLE PUBLICACION_RECETA (
+    id_publicacion NUMBER PRIMARY KEY,
+    id_platillo NUMBER NOT NULL,
+    titulo_publico VARCHAR2(160) NOT NULL,
+    historia VARCHAR2(1200),
+    estatus VARCHAR2(20) DEFAULT 'PUBLICADA' NOT NULL,
+    destacado CHAR(1) DEFAULT 'N' NOT NULL,
+    fecha_publicacion DATE DEFAULT SYSDATE NOT NULL,
+    fecha_actualizacion DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT fk_pub_receta_platillo FOREIGN KEY (id_platillo) REFERENCES PLATILLO(id_platillo),
+    CONSTRAINT uq_pub_receta_platillo UNIQUE (id_platillo),
+    CONSTRAINT ck_pub_receta_estatus CHECK (estatus IN ('BORRADOR', 'PUBLICADA', 'ARCHIVADA')),
+    CONSTRAINT ck_pub_receta_destacado CHECK (destacado IN ('S', 'N'))
 );
 
 CREATE TABLE COMPLEMENTO (
@@ -400,7 +417,7 @@ ALTER TABLE SOLICITUD_SERVICIO ADD origen VARCHAR2(40) DEFAULT 'WEB' NOT NULL;
 
 
 -- ============================================================================
--- 02 SECUENCIAS E INDICES
+-- 03 SECUENCIAS E INDICES
 -- Archivo fuente: database\03_secuencias_indices.sql
 -- ============================================================================
 
@@ -413,6 +430,7 @@ CREATE SEQUENCE sq_platillo START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_ingrediente START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_platillo_ingrediente START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_instruccion START WITH 1 INCREMENT BY 1 NOCACHE;
+CREATE SEQUENCE sq_publicacion_receta START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_complemento START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_salon START WITH 1 INCREMENT BY 1 NOCACHE;
 CREATE SEQUENCE sq_paquete START WITH 1 INCREMENT BY 1 NOCACHE;
@@ -432,6 +450,7 @@ CREATE INDEX ix_usuario_rol ON USUARIO(rol, activo);
 CREATE INDEX ix_cliente_nombre ON CLIENTE(nombre, apellido);
 CREATE INDEX ix_gerente_estatus ON GERENTE(estatus);
 CREATE INDEX ix_platillo_categoria ON PLATILLO(categoria, activo);
+CREATE INDEX ix_publicacion_receta_estado ON PUBLICACION_RECETA(estatus, destacado, fecha_publicacion);
 CREATE INDEX ix_salon_capacidad ON SALON(capacidad_maxima, convenio_activo, activo);
 CREATE INDEX ix_solicitud_estatus_fecha ON SOLICITUD_SERVICIO(estatus, fecha_evento);
 CREATE INDEX ix_proyecto_fecha_estatus ON PROYECTO_EVENTO(fecha_evento, estatus);
@@ -445,7 +464,7 @@ CREATE INDEX ix_notificacion_destino ON NOTIFICACION(tipo_destinatario, id_desti
 
 
 -- ============================================================================
--- 03 VISTAS Y SINONIMOS
+-- 04 VISTAS Y SINONIMOS
 -- Archivo fuente: database\04_vistas_sinonimos.sql
 -- ============================================================================
 
@@ -470,6 +489,42 @@ SELECT
     ) AS numero_ingredientes
 FROM PLATILLO pl
 WHERE pl.activo = 'S';
+
+CREATE OR REPLACE VIEW vw_recetario_catherine AS
+SELECT
+    pr.id_publicacion,
+    pr.id_platillo,
+    INITCAP(pl.nombre) AS nombre,
+    pr.titulo_publico,
+    pl.descripcion,
+    pr.historia,
+    pl.categoria,
+    pl.tipo_dieta,
+    pl.dificultad,
+    pl.foto_url,
+    pl.porciones_base,
+    pr.estatus,
+    pr.destacado,
+    pr.fecha_publicacion,
+    pr.fecha_actualizacion,
+    (
+        SELECT COUNT(1)
+        FROM PLATILLO_INGREDIENTE pi
+        WHERE pi.id_platillo = pl.id_platillo
+    ) AS numero_ingredientes,
+    (
+        SELECT COUNT(1)
+        FROM INSTRUCCION inst
+        WHERE inst.id_platillo = pl.id_platillo
+    ) AS numero_pasos
+FROM PUBLICACION_RECETA pr
+INNER JOIN PLATILLO pl ON pl.id_platillo = pr.id_platillo
+WHERE pl.activo = 'S';
+
+CREATE OR REPLACE VIEW vw_recetario_publico AS
+SELECT *
+FROM vw_recetario_catherine
+WHERE estatus = 'PUBLICADA';
 
 CREATE OR REPLACE VIEW vw_complementos_publicos AS
 SELECT
@@ -822,6 +877,7 @@ LEFT JOIN INSTRUCCION inst ON inst.id_platillo = pl.id_platillo
 WHERE pl.activo = 'S';
 
 CREATE OR REPLACE SYNONYM cat_platillos FOR vw_platillos_publicos;
+CREATE OR REPLACE SYNONYM cat_recetario FOR vw_recetario_publico;
 CREATE OR REPLACE SYNONYM cat_complementos FOR vw_complementos_publicos;
 CREATE OR REPLACE SYNONYM cat_salones FOR vw_salones_publicos;
 CREATE OR REPLACE SYNONYM rep_cobranza FOR vw_eventos_no_finiquitados_21;
@@ -831,7 +887,7 @@ CREATE OR REPLACE SYNONYM rep_recetas FOR vw_recetas_chef;
 
 
 -- ============================================================================
--- 04 FUNCIONES Y PROCEDIMIENTOS PL SQL
+-- 05 FUNCIONES Y PROCEDIMIENTOS
 -- Archivo fuente: database\05_funciones_procedimientos.sql
 -- ============================================================================
 
@@ -1652,7 +1708,7 @@ END;
 
 
 -- ============================================================================
--- 05 DML - DATOS DE PRUEBA
+-- 06 DATOS DE PRUEBA
 -- Archivo fuente: database\06_datos_prueba.sql
 -- ============================================================================
 
@@ -1690,18 +1746,18 @@ INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 11, 'Paola', 'Vega', 'paola.vega
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 12, 'Ricardo', 'Leon', 'ricardo.leon@example.com', '555-200-0009', 'Calle Mar 88', SYSDATE);
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 13, 'Elena', 'Campos', 'elena.campos@example.com', '555-200-0010', 'Av. Jardin 42', SYSDATE);
 
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 82.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 61.00, 4, 'FUERTE', 'VEGETARIANO', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 138.00, 6, 'FUERTE', 'PREMIUM', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 79.00, 4, 'FUERTE', 'LIGERO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 65.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ASADO DE BODA ZACATECANO', 'Guiso tradicional de cerdo con chile rojo y especias', 210.00, 92.00, 6, 'FUERTE', 'REGIONAL', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'LOMO EN SALSA DE VINO TINTO', 'Lomo de cerdo glaseado con salsa de vino y hierbas', 235.00, 105.00, 6, 'FUERTE', 'FORMAL', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CANAPES DE QUESO Y MEMBRILLO', 'Bocados frios para recepcion con queso regional y membrillo', 95.00, 36.00, 12, 'ENTRADA', 'REGIONAL', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'MOUSSE DE CHOCOLATE', 'Postre individual con chocolate semiamargo y crema batida', 80.00, 31.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 82.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/platillos/brocheta-res.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 61.00, 4, 'FUERTE', 'VEGETARIANO', 'ALTA', 'img/platillos/chiles-rellenos-queso.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 138.00, 6, 'FUERTE', 'PREMIUM', 'ALTA', 'img/platillos/filete-mignon-champinones.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 79.00, 4, 'FUERTE', 'LIGERO', 'MEDIA', 'img/platillos/pescado-vapor.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 65.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/platillos/pollo-cerveza.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'img/platillos/crema-elote.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'img/platillos/ensalada-mediterranea.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/platillos/pastel-tres-leches.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ASADO DE BODA ZACATECANO', 'Guiso tradicional de cerdo con chile rojo y especias', 210.00, 92.00, 6, 'FUERTE', 'REGIONAL', 'ALTA', 'img/platillos/asado-boda-zacatecano.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'LOMO EN SALSA DE VINO TINTO', 'Lomo de cerdo glaseado con salsa de vino y hierbas', 235.00, 105.00, 6, 'FUERTE', 'FORMAL', 'ALTA', 'img/platillos/lomo-vino-tinto.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CANAPES DE QUESO Y MEMBRILLO', 'Bocados frios para recepcion con queso regional y membrillo', 95.00, 36.00, 12, 'ENTRADA', 'REGIONAL', 'BAJA', 'img/platillos/canapes-queso-membrillo.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'MOUSSE DE CHOCOLATE', 'Postre individual con chocolate semiamargo y crema batida', 80.00, 31.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/platillos/mousse-chocolate.jpg', 'S');
 
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'FILETE DE RES', 'GRAMOS', 'GRANEL', 'Corte fresco');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE MORRON', 'PIEZAS', 'PIEZA', 'Rojo o verde');
@@ -1806,6 +1862,15 @@ INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 10, 2, 'Hornear con rome
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 11, 1, 'Cortar baguette, montar queso de cabra y membrillo.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 1, 'Fundir chocolate y mezclar con crema batida.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 2, 'Refrigerar en porciones individuales.', NULL);
+
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 1, 'Brochetas De Res Para Compartir', 'Una receta practica para reuniones familiares, con piezas pequenas para servir al centro de la mesa.', 'PUBLICADA', 'N', SYSDATE - 12, SYSDATE - 12);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 2, 'Chiles Rellenos De Queso', 'Catherine prepara esta receta cuando quiere algo casero, rendidor y con sabor tradicional.', 'PUBLICADA', 'S', SYSDATE - 11, SYSDATE - 11);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 5, 'Pollo A La Cerveza', 'Una receta de domingo: sencilla, aromatica y perfecta para acompanar con arroz o verduras.', 'PUBLICADA', 'S', SYSDATE - 10, SYSDATE - 10);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 6, 'Crema De Elote Suave', 'Entrada cremosa para dias tranquilos, facil de servir en tazas pequenas o plato hondo.', 'PUBLICADA', 'N', SYSDATE - 9, SYSDATE - 9);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 8, 'Pastel Tres Leches Familiar', 'El postre que siempre piden en casa: humedo, dulce y listo para celebraciones pequenas.', 'PUBLICADA', 'S', SYSDATE - 8, SYSDATE - 8);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 9, 'Asado De Boda Zacatecano', 'Receta regional con chile rojo y especias, pensada para documentar el sazon que Catherine comparte con su familia.', 'PUBLICADA', 'N', SYSDATE - 7, SYSDATE - 7);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 11, 'Canapes De Queso Y Membrillo', 'Bocados pequenos para visitas inesperadas, con contraste dulce y salado.', 'PUBLICADA', 'N', SYSDATE - 6, SYSDATE - 6);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 12, 'Mousse De Chocolate', 'Postre frio para preparar con anticipacion y servir en vasitos individuales.', 'BORRADOR', 'N', SYSDATE - 5, SYSDATE - 5);
 
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'BARRA DE BEBIDAS', 'Aguas frescas y refrescos por persona', 55.00, 'BEBIDA', 'POR_PERSONA', 'S');
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'MESA DE POSTRES', 'Variedad de postres individuales', 85.00, 'POSTRE', 'POR_PERSONA', 'S');
@@ -1947,7 +2012,7 @@ COMMIT;
 
 
 -- ============================================================================
--- 06 EVIDENCIAS DEL SEMESTRE
+-- 07 EVIDENCIAS SQL DEVELOPER
 -- Archivo fuente: database\07_evidencias_sql_developer.sql
 -- ============================================================================
 
@@ -2147,7 +2212,7 @@ DROP TABLE tmp_evidencia_dml;
 
 
 -- ============================================================================
--- 07 DEMO DE TRANSACCIONES Y REGLAS
+-- 08 DEMO DE TRANSACCIONES
 -- Archivo fuente: database\08_demo_transacciones.sql
 -- ============================================================================
 
@@ -2197,11 +2262,12 @@ ORDER BY fecha_creacion DESC;
 
 
 -- ============================================================================
--- 08 CONSULTAS PARA EXPOSICION
+-- 10 CONSULTAS SQL DEVELOPER
 -- Archivo fuente: database\10_consultas_sql_developer.sql
 -- ============================================================================
 
 -- Consultas listas para exposicion en SQL Developer.
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 -- Conexion recomendada:
 -- Usuario: BANQUETES_CATHERINE
 -- Password: Catherine2026
@@ -2342,9 +2408,30 @@ SELECT
 FROM platillo
 WHERE porciones_base <> 1;
 
+-- 15. Recetario publico: publicaciones con conteo de ingredientes y pasos.
+SELECT
+    titulo_publico,
+    categoria,
+    dificultad,
+    destacado,
+    numero_ingredientes,
+    numero_pasos
+FROM vw_recetario_publico
+ORDER BY destacado DESC, titulo_publico;
+
+-- 16. Receta compartida: publicacion, platillo base, ingredientes e instrucciones.
+SELECT
+    r.titulo_publico,
+    i.nombre_ingrediente,
+    pi.cantidad,
+    i.unidad_medida,
+    inst.numero_paso,
+    inst.instruccion
+FROM vw_recetario_publico r
+INNER JOIN platillo_ingrediente pi ON pi.id_platillo = r.id_platillo
+INNER JOIN ingrediente i ON i.id_ingrediente = pi.id_ingrediente
+LEFT JOIN instruccion inst ON inst.id_platillo = r.id_platillo
+WHERE r.destacado = 'S'
+ORDER BY r.titulo_publico, i.nombre_ingrediente, inst.numero_paso;
 
 
--- ============================================================================
--- FIN DEL ARCHIVO MAESTRO
--- ============================================================================
-SELECT 'Archivo maestro Banquetes Catherine ejecutado' AS resultado FROM dual;

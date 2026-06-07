@@ -1,5 +1,6 @@
 -- Esquema principal para Banquetes Catherine.
 -- Ejecutar conectado como BANQUETES_CATHERINE.
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 
 CREATE TABLE USUARIO (
     id_usuario NUMBER PRIMARY KEY,
@@ -90,6 +91,21 @@ CREATE TABLE INSTRUCCION (
     CONSTRAINT fk_inst_platillo FOREIGN KEY (id_platillo) REFERENCES PLATILLO(id_platillo),
     CONSTRAINT uq_inst_paso UNIQUE (id_platillo, numero_paso),
     CONSTRAINT ck_inst_paso CHECK (numero_paso > 0)
+);
+
+CREATE TABLE PUBLICACION_RECETA (
+    id_publicacion NUMBER PRIMARY KEY,
+    id_platillo NUMBER NOT NULL,
+    titulo_publico VARCHAR2(160) NOT NULL,
+    historia VARCHAR2(1200),
+    estatus VARCHAR2(20) DEFAULT 'PUBLICADA' NOT NULL,
+    destacado CHAR(1) DEFAULT 'N' NOT NULL,
+    fecha_publicacion DATE DEFAULT SYSDATE NOT NULL,
+    fecha_actualizacion DATE DEFAULT SYSDATE NOT NULL,
+    CONSTRAINT fk_pub_receta_platillo FOREIGN KEY (id_platillo) REFERENCES PLATILLO(id_platillo),
+    CONSTRAINT uq_pub_receta_platillo UNIQUE (id_platillo),
+    CONSTRAINT ck_pub_receta_estatus CHECK (estatus IN ('BORRADOR', 'PUBLICADA', 'ARCHIVADA')),
+    CONSTRAINT ck_pub_receta_destacado CHECK (destacado IN ('S', 'N'))
 );
 
 CREATE TABLE COMPLEMENTO (

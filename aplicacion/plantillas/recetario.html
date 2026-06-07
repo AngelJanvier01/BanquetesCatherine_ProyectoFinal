@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block titulo %}Recetario de Catherine{% endblock %}
+
+{% block contenido %}
+<section class="recetario-hero" data-recetario data-vista-inicial="{{ vista_inicial }}">
+    <div class="recetario-hero-capa">
+        <div class="recetario-hero-texto">
+            <p class="etiqueta">Recetario personal</p>
+            <h1>Recetario de Catherine</h1>
+            <p>Un blog sencillo para guardar recetas caseras, contar su historia y compartirlas con familia y amigos.</p>
+            <p class="firma-recetario">Angel Janvier Gonzalez Delgado</p>
+            <div class="selector-vista" role="tablist" aria-label="Cambiar vista del recetario">
+                <button class="activo" type="button" data-vista-recetario="publica">Vista publica</button>
+                <button type="button" data-vista-recetario="catherine">Vista Catherine</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if error_bd %}
+    <section class="contenedor bloque">
+        <p class="mensaje aviso">La tabla nueva del recetario aun no esta instalada; se muestran recetas desde el catalogo base.</p>
+    </section>
+{% endif %}
+
+<section class="panel-recetario activo" data-panel-recetario="publica">
+    <div class="contenedor seccion">
+        <div class="encabezado-seccion">
+            <div>
+                <p class="etiqueta">Para consultar</p>
+                <h2>Recetas publicadas</h2>
+                <p>Platillos compartidos por Catherine con ingredientes y procedimiento.</p>
+            </div>
+            <span class="contador-filtro">{{ publicas|length }} receta{{ "" if publicas|length == 1 else "s" }}</span>
+        </div>
+
+        <div class="barra-filtros" aria-label="Filtrar recetas">
+            <button class="filtro-catalogo activo" type="button" data-filtro-recetario="TODOS">Todas</button>
+            {% for categoria in categorias %}
+                <button class="filtro-catalogo" type="button" data-filtro-recetario="{{ categoria }}">{{ categoria|title }}</button>
+            {% endfor %}
+            <span id="conteoRecetario" class="contador-filtro"></span>
+        </div>
+
+        <div class="rejilla tarjetas tarjetas-blog">
+            {% for receta in publicas %}
+                {% set imagen = receta.foto_url if receta.foto_url and receta.foto_url != "img/hero-banquetes.png" else "img/hero-recetario.png" %}
+                <article class="tarjeta tarjeta-blog animar-entrada" data-tarjeta-recetario data-categoria="{{ receta.categoria }}">
+                    <img src="{{ url_for('static', filename=imagen) }}" alt="{{ receta.titulo_publico or receta.nombre }}">
+                    <div class="tarjeta-blog-cuerpo">
+                        <div class="tarjeta-cabecera">
+                            <span class="pildora">{{ receta.categoria }}</span>
+                            {% if receta.destacado == "S" %}<span class="pildora pildora-rosa">Favorita</span>{% endif %}
+                        </div>
+                        <h3>{{ receta.titulo_publico or receta.nombre }}</h3>
+                        <p>{{ receta.descripcion }}</p>
+                        <dl class="datos-mini">
+                            <div><dt>Dificultad</dt><dd>{{ receta.dificultad }}</dd></div>
+                            <div><dt>Porciones</dt><dd>{{ receta.porciones_base }}</dd></div>
+                            <div><dt>Ingredientes</dt><dd>{{ receta.numero_ingredientes }}</dd></div>
+                            <div><dt>Pasos</dt><dd>{{ receta.numero_pasos }}</dd></div>
+                        </dl>
+                        <button class="boton boton-chico" type="button" data-abrir-receta="recetario-{{ receta.id_publicacion }}">Ver receta</button>
+                    </div>
+                </article>
+            {% else %}
+                <article class="tarjeta">
+                    <span class="pildora">Sin publicaciones</span>
+                    <h3>No hay recetas publicadas todavia</h3>
+                    <p>Cambia a la vista Catherine para cargar la primera receta.</p>
+                </article>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<section class="panel-recetario" data-panel-recetario="catherine">
+    <div class="contenedor seccion">
+        <div class="encabezado-seccion">
+            <div>
+                <p class="etiqueta">Para Catherine</p>
+                <h2>Cargar receta libre</h2>
+                <p>Esta vista guarda en las mismas tablas de platillos, ingredientes e instrucciones.</p>
+            </div>
+        </div>
+
+        <form class="formulario formulario-recetario-libre" method="post" action="{{ url_for('crear_receta_recetario') }}" data-recetario-builder>
+            <input name="nombre" placeholder="Nombre de la receta" required maxlength="120">
+            <input name="titulo_publico" placeholder="Titulo publico opcional" maxlength="160">
+            <input name="categoria" placeholder="Categoria" value="CASERA" required maxlength="60">
+            <input name="tipo_dieta" placeholder="Estilo o dieta" value="GENERAL" maxlength="60">
+            <select name="dificultad" required>
+                <option>BAJA</option>
+                <option selected>MEDIA</option>
+                <option>ALTA</option>
+            </select>
+            <input name="porciones_base" type="number" min="1" value="4" placeholder="Porciones">
+            <input name="precio" type="number" min="0" step="0.01" placeholder="Precio si tambien se vendera">
+            <input name="costo_estimado" type="number" min="0" step="0.01" placeholder="Costo estimado">
+            <input class="ancho-total" name="foto_url" placeholder="Imagen local, ej. img/hero-recetario.png" value="img/hero-recetario.png">
+            <textarea class="ancho-total" name="descripcion" rows="3" placeholder="Descripcion breve para la tarjeta"></textarea>
+            <textarea class="ancho-total" name="historia" rows="3" placeholder="Historia, nota familiar o consejo personal"></textarea>
+
+            <div class="constructor-receta constructor-recetario">
+                <div>
+                    <h3>Ingredientes</h3>
+                    <div class="formulario-linea">
+                        <input data-receta-ingrediente-nombre placeholder="Ingrediente">
+                        <input data-receta-ingrediente-cantidad type="number" min="0.001" step="0.001" placeholder="Cantidad">
+                        <input data-receta-ingrediente-unidad placeholder="Unidad">
+                        <button class="boton boton-chico" type="button" data-agregar-ingrediente-libre>Agregar</button>
+                    </div>
+                    <div class="lista-constructor" data-lista-ingredientes-libres></div>
+                </div>
+
+                <div>
+                    <h3>Procedimiento</h3>
+                    <div class="formulario-linea">
+                        <input data-receta-paso placeholder="Paso de preparacion">
+                        <button class="boton boton-chico" type="button" data-agregar-paso-libre>Agregar</button>
+                    </div>
+                    <div class="lista-constructor" data-lista-pasos-libres></div>
+                </div>
+            </div>
+
+            <div class="opciones opciones-publicacion">
+                <label>
+                    Estado
+                    <select name="estatus">
+                        <option value="PUBLICADA">Publicada</option>
+                        <option value="BORRADOR">Borrador</option>
+                    </select>
+                </label>
+                <label class="check-publicacion">
+                    <input type="checkbox" name="destacado" value="S">
+                    Marcar como favorita
+                </label>
+            </div>
+            <button class="boton boton-oscuro" type="submit">Guardar receta</button>
+        </form>
+
+        <section class="bloque">
+            <div class="encabezado-seccion">
+                <div>
+                    <h2>Publicaciones registradas</h2>
+                    <p>Control rapido para revisar que recetas estan publicadas, en borrador o destacadas.</p>
+                </div>
+            </div>
+            <div class="tabla-contenedor">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Receta</th>
+                            <th>Categoria</th>
+                            <th>Estado</th>
+                            <th>Destacada</th>
+                            <th>Ingredientes</th>
+                            <th>Pasos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receta in recetas %}
+                            <tr>
+                                <td><strong>{{ receta.titulo_publico or receta.nombre }}</strong><br><span>{{ receta.descripcion }}</span></td>
+                                <td>{{ receta.categoria }}</td>
+                                <td><span class="estado-receta estado-{{ receta.estatus|lower }}">{{ receta.estatus }}</span></td>
+                                <td>{{ "Si" if receta.destacado == "S" else "No" }}</td>
+                                <td>{{ receta.numero_ingredientes }}</td>
+                                <td>{{ receta.numero_pasos }}</td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6">Aun no hay recetas capturadas.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+</section>
+
+{% for receta in publicas %}
+    {% set imagen = receta.foto_url if receta.foto_url and receta.foto_url != "img/hero-banquetes.png" else "img/hero-recetario.png" %}
+    <div class="modal-receta" id="recetario-{{ receta.id_publicacion }}" aria-hidden="true">
+        <div class="modal-fondo" data-cerrar-receta></div>
+        <section class="modal-contenido modal-receta-contenido" role="dialog" aria-modal="true">
+            <button class="modal-cerrar" type="button" data-cerrar-receta aria-label="Cerrar">x</button>
+            <div class="detalle-receta">
+                <img src="{{ url_for('static', filename=imagen) }}" alt="{{ receta.titulo_publico or receta.nombre }}">
+                <div>
+                    <span class="pildora">{{ receta.categoria }} - {{ receta.dificultad }}</span>
+                    <h2>{{ receta.titulo_publico or receta.nombre }}</h2>
+                    <p>{{ receta.historia or receta.descripcion }}</p>
+                    <dl class="datos-mini">
+                        <div><dt>Porciones</dt><dd>{{ receta.porciones_base }}</dd></div>
+                        <div><dt>Estilo</dt><dd>{{ receta.tipo_dieta }}</dd></div>
+                        <div><dt>Ingredientes</dt><dd>{{ receta.numero_ingredientes }}</dd></div>
+                        <div><dt>Pasos</dt><dd>{{ receta.numero_pasos }}</dd></div>
+                    </dl>
+                </div>
+            </div>
+
+            <div class="dos-columnas">
+                <section>
+                    <h3>Ingredientes</h3>
+                    <div class="lista-precios">
+                        {% for ingrediente in receta_ingredientes if ingrediente.id_platillo == receta.id_platillo %}
+                            <div>
+                                <span>{{ ingrediente.nombre_ingrediente|title }}</span>
+                                <strong>{{ ingrediente.cantidad }} {{ ingrediente.unidad_medida|lower }}</strong>
+                            </div>
+                        {% else %}
+                            <p class="texto-suave">Sin ingredientes registrados.</p>
+                        {% endfor %}
+                    </div>
+                </section>
+
+                <section>
+                    <h3>Procedimiento</h3>
+                    <ol class="lista-pasos">
+                        {% for paso in receta_pasos if paso.id_platillo == receta.id_platillo %}
+                            <li>
+                                <strong>{{ paso.instruccion }}</strong>
+                                {% if paso.detalle_instruccion %}<span>{{ paso.detalle_instruccion }}</span>{% endif %}
+                            </li>
+                        {% else %}
+                            <li>Sin pasos registrados.</li>
+                        {% endfor %}
+                    </ol>
+                </section>
+            </div>
+        </section>
+    </div>
+{% endfor %}
+{% endblock %}

@@ -1,4 +1,5 @@
 -- Instalador completo para SQL Developer o SQLcl.
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 -- Ejecutar conectado como BANQUETES_CATHERINE desde la carpeta database.
 
 @@00_drop_schema_objects.sql
@@ -8,6 +9,6 @@
 @@05_funciones_procedimientos.sql
 @@06_datos_prueba.sql
 
-SELECT 'Instalacion de Banquetes Catherine completada' AS resultado FROM dual;
+SELECT 'Instalacion de Catherine: banquetes y recetario completada' AS resultado FROM dual;
 
 EXIT SUCCESS

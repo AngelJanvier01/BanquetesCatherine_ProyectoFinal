@@ -136,3 +136,16 @@ SELECT
 FROM PLATILLO pl
 LEFT JOIN vw_popularidad_platillos vp ON vp.id_platillo = pl.id_platillo
 ORDER BY proyectos_demandados DESC, pl.nombre;
+
+PROMPT ============================================================
+PROMPT  11) Recetario Catherine publicado sobre las mismas recetas
+PROMPT ============================================================
+SELECT
+    titulo_publico,
+    categoria,
+    dificultad,
+    destacado,
+    numero_ingredientes,
+    numero_pasos
+FROM vw_recetario_publico
+ORDER BY destacado DESC, titulo_publico;

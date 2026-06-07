@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catherine</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body class="portal-body">
+    <main class="portal-selector">
+        <section class="portal-panel">
+            <div class="portal-copy">
+                <p class="etiqueta">Proyecto Catherine</p>
+                <h1>Elige que experiencia quieres abrir</h1>
+                <p>El sistema ahora comparte una sola base de datos para banquetes y recetas, pero cada area tiene su propia forma de navegarse.</p>
+            </div>
+            <div class="portal-opciones" aria-label="Seleccion de proyecto">
+                <a class="portal-opcion portal-banquetes" href="{{ url_for('inicio') }}">
+                    <span>Banquetes Catherine</span>
+                    <strong>Eventos, salones, paquetes, clientes y pagos.</strong>
+                </a>
+                <a class="portal-opcion portal-recetario" href="{{ url_for('recetario') }}">
+                    <span>Recetario de Catherine</span>
+                    <strong>Blog de recetas para publicar y consultar platillos.</strong>
+                </a>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

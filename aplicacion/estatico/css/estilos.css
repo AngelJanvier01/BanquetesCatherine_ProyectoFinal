@@ -66,6 +66,23 @@ a {
     box-shadow: 0 10px 30px rgba(24, 31, 26, 0.08);
 }
 
+.barra-recetario {
+    background: rgba(255, 250, 253, 0.95);
+    border-bottom-color: #ecd2d8;
+}
+
+.barra-recetario .marca {
+    color: #8d2441;
+}
+
+.barra-recetario .marca small {
+    color: #5f7467;
+}
+
+.barra-recetario .navegacion a:hover {
+    color: #8d2441;
+}
+
 .marca {
     display: grid;
     gap: 0;
@@ -995,6 +1012,285 @@ td span {
     padding: 18px;
 }
 
+.portal-body {
+    min-height: 100vh;
+    background:
+        linear-gradient(115deg, rgba(25, 56, 47, 0.84), rgba(25, 56, 47, 0.34)),
+        url("../img/hero-recetario.png") center / cover no-repeat;
+}
+
+.portal-selector {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: clamp(18px, 4vw, 56px);
+}
+
+.portal-panel {
+    width: min(980px, 100%);
+    display: grid;
+    grid-template-columns: minmax(0, 0.86fr) minmax(280px, 1fr);
+    gap: clamp(18px, 4vw, 42px);
+    align-items: center;
+    padding: clamp(22px, 4vw, 42px);
+    background: rgba(255, 253, 249, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 24px 70px rgba(12, 18, 15, 0.22);
+    backdrop-filter: blur(10px);
+}
+
+.portal-copy h1 {
+    margin: 14px 0;
+    color: var(--verde);
+    font-size: clamp(2rem, 5vw, 4rem);
+    line-height: 1;
+}
+
+.portal-copy p {
+    color: var(--suave);
+}
+
+.portal-opciones {
+    display: grid;
+    gap: 14px;
+}
+
+.portal-opcion {
+    min-height: 168px;
+    display: grid;
+    align-content: end;
+    gap: 10px;
+    padding: 22px;
+    border: 1px solid var(--linea);
+    border-radius: 8px;
+    color: var(--blanco);
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 14px 34px rgba(24, 31, 26, 0.16);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.portal-opcion::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.72));
+    z-index: 0;
+}
+
+.portal-opcion span,
+.portal-opcion strong {
+    position: relative;
+    z-index: 1;
+}
+
+.portal-opcion span {
+    font-size: clamp(1.45rem, 3vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1;
+}
+
+.portal-opcion strong {
+    max-width: 320px;
+    color: rgba(255, 255, 255, 0.84);
+    font-size: 0.94rem;
+}
+
+.portal-opcion:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 22px 44px rgba(24, 31, 26, 0.22);
+}
+
+.portal-banquetes {
+    background:
+        linear-gradient(180deg, rgba(25, 56, 47, 0.1), rgba(25, 56, 47, 0.55)),
+        url("../img/hero-banquetes.png") center / cover no-repeat;
+}
+
+.portal-recetario {
+    background:
+        linear-gradient(180deg, rgba(157, 40, 72, 0.05), rgba(157, 40, 72, 0.48)),
+        url("../img/hero-recetario.png") center / cover no-repeat;
+}
+
+.recetario-hero {
+    min-height: 76vh;
+    background:
+        linear-gradient(90deg, rgba(255, 253, 249, 0.98), rgba(255, 253, 249, 0.78), rgba(255, 253, 249, 0.12)),
+        url("../img/hero-recetario.png") center / cover no-repeat;
+}
+
+.recetario-hero-capa {
+    min-height: inherit;
+    display: flex;
+    align-items: center;
+    width: min(1160px, calc(100% - 36px));
+    margin-inline: auto;
+    padding-block: 72px 96px;
+}
+
+.recetario-hero-texto {
+    width: min(570px, 100%);
+}
+
+.recetario-hero h1 {
+    margin: 14px 0;
+    color: #8d2441;
+    font-size: clamp(2.4rem, 6vw, 5.2rem);
+    line-height: 0.98;
+}
+
+.recetario-hero p {
+    color: #4d5b50;
+    font-size: 1.08rem;
+}
+
+.firma-recetario {
+    width: fit-content;
+    margin-top: 14px;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.74);
+    border: 1px solid #e7c4cb;
+    border-radius: 6px;
+    color: #8d2441 !important;
+    font-size: 0.94rem !important;
+    font-weight: 800;
+}
+
+.selector-vista {
+    width: fit-content;
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 20px;
+    padding: 6px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #e7c4cb;
+    border-radius: 8px;
+    box-shadow: 0 12px 30px rgba(157, 40, 72, 0.12);
+}
+
+.selector-vista button {
+    min-height: 40px;
+    padding: 9px 13px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: #8d2441;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 800;
+}
+
+.selector-vista button.activo,
+.selector-vista button:hover {
+    background: #8d2441;
+    color: var(--blanco);
+}
+
+.panel-recetario {
+    display: none;
+}
+
+.panel-recetario.activo {
+    display: block;
+}
+
+.tarjetas-blog {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.tarjeta-blog {
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #fffafd;
+    border-color: #ecd2d8;
+}
+
+.tarjeta-blog img {
+    width: 100%;
+    aspect-ratio: 16 / 11;
+    object-fit: cover;
+    display: block;
+}
+
+.tarjeta-blog-cuerpo {
+    display: grid;
+    gap: 10px;
+    padding: 18px;
+}
+
+.pildora-rosa {
+    color: #8d2441;
+    background: #f9e7ed;
+    border-color: #e5b7c1;
+}
+
+.formulario-recetario-libre {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    background:
+        linear-gradient(180deg, #fffafd, #ffffff);
+    border-color: #ecd2d8;
+}
+
+.constructor-recetario {
+    grid-template-columns: minmax(0, 1fr);
+    background: #fff7f9;
+    border-color: #ecd2d8;
+}
+
+.opciones-publicacion {
+    grid-column: 1 / -1;
+    align-items: end;
+}
+
+.opciones-publicacion label {
+    display: grid;
+    gap: 6px;
+}
+
+.check-publicacion {
+    min-height: 42px;
+    display: flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #fffdf9;
+    border: 1px solid #cfc7bc;
+    border-radius: 6px;
+}
+
+.check-publicacion input {
+    width: 18px;
+    height: 18px;
+}
+
+.estado-receta {
+    display: inline-flex;
+    width: fit-content;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-weight: 800;
+    font-size: 0.78rem;
+}
+
+.estado-publicada {
+    color: #19382f;
+    background: #dceee6;
+}
+
+.estado-borrador {
+    color: #7b4f11;
+    background: #f7ead1;
+}
+
+.estado-archivada {
+    color: #686868;
+    background: #ececec;
+}
+
 .modal-receta {
     position: fixed;
     inset: 0;
@@ -1097,6 +1393,7 @@ td span {
 .pie {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 16px;
     padding: 22px clamp(18px, 4vw, 56px);
     color: var(--suave);
@@ -1272,6 +1569,7 @@ td span {
     .formulario-dos-columnas,
     .dos-columnas,
     .pantalla-acceso,
+    .portal-panel,
     .constructor-receta,
     .detalle-receta {
         grid-template-columns: 1fr;
@@ -1290,7 +1588,8 @@ td span {
     }
 
     .formulario-menu,
-    .formulario-receta {
+    .formulario-receta,
+    .formulario-recetario-libre {
         grid-template-columns: 1fr;
     }
 
@@ -1331,6 +1630,36 @@ td span {
         width: calc(100% - 32px);
         margin-inline: 16px;
         padding-block: 56px;
+    }
+
+    .portal-selector {
+        align-items: start;
+        padding: 16px;
+    }
+
+    .portal-panel {
+        padding: 18px;
+    }
+
+    .portal-opcion {
+        min-height: 142px;
+    }
+
+    .recetario-hero {
+        min-height: 68vh;
+        background:
+            linear-gradient(180deg, rgba(255, 253, 249, 0.97), rgba(255, 253, 249, 0.66)),
+            url("../img/hero-recetario.png") center / cover no-repeat;
+    }
+
+    .recetario-hero-capa {
+        width: calc(100% - 32px);
+        padding-block: 52px;
+    }
+
+    .selector-vista,
+    .selector-vista button {
+        width: 100%;
     }
 
     .lista-precios > div,

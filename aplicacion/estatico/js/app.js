@@ -233,6 +233,51 @@ botonesPlatillos.forEach((boton) => {
 
 if (tarjetasPlatillos.length) filtrarPlatillos("TODOS");
 
+const botonesRecetario = document.querySelectorAll("[data-filtro-recetario]");
+const tarjetasRecetario = document.querySelectorAll("[data-tarjeta-recetario]");
+const conteoRecetario = document.getElementById("conteoRecetario");
+
+function filtrarRecetario(categoria) {
+    let visibles = 0;
+    tarjetasRecetario.forEach((tarjeta) => {
+        const mostrar = categoria === "TODOS" || tarjeta.dataset.categoria === categoria;
+        tarjeta.hidden = !mostrar;
+        if (mostrar) visibles += 1;
+    });
+    if (conteoRecetario) {
+        conteoRecetario.textContent = `${visibles} receta${visibles === 1 ? "" : "s"}`;
+    }
+}
+
+botonesRecetario.forEach((boton) => {
+    boton.addEventListener("click", () => {
+        activarFiltro(botonesRecetario, boton);
+        filtrarRecetario(boton.dataset.filtroRecetario);
+    });
+});
+
+if (tarjetasRecetario.length) filtrarRecetario("TODOS");
+
+const recetario = document.querySelector("[data-recetario]");
+const botonesVistaRecetario = document.querySelectorAll("[data-vista-recetario]");
+const panelesRecetario = document.querySelectorAll("[data-panel-recetario]");
+
+function cambiarVistaRecetario(vista) {
+    const vistaFinal = vista === "catherine" ? "catherine" : "publica";
+    botonesVistaRecetario.forEach((boton) => {
+        boton.classList.toggle("activo", boton.dataset.vistaRecetario === vistaFinal);
+    });
+    panelesRecetario.forEach((panel) => {
+        panel.classList.toggle("activo", panel.dataset.panelRecetario === vistaFinal);
+    });
+}
+
+botonesVistaRecetario.forEach((boton) => {
+    boton.addEventListener("click", () => cambiarVistaRecetario(boton.dataset.vistaRecetario));
+});
+
+if (recetario) cambiarVistaRecetario(recetario.dataset.vistaInicial);
+
 const botonesSalones = document.querySelectorAll("[data-filtro-salon]");
 const tarjetasSalones = document.querySelectorAll("[data-tarjeta-salon]");
 const conteoSalones = document.getElementById("conteoSalones");
@@ -364,6 +409,55 @@ document.querySelectorAll("[data-receta-builder]").forEach((formulario) => {
 
     [costo, margen, precio].forEach((campo) => campo?.addEventListener("input", actualizarPrecio));
     actualizarPrecio();
+});
+
+document.querySelectorAll("[data-recetario-builder]").forEach((formulario) => {
+    const nombreIngrediente = formulario.querySelector("[data-receta-ingrediente-nombre]");
+    const cantidadIngrediente = formulario.querySelector("[data-receta-ingrediente-cantidad]");
+    const unidadIngrediente = formulario.querySelector("[data-receta-ingrediente-unidad]");
+    const listaIngredientes = formulario.querySelector("[data-lista-ingredientes-libres]");
+    const textoPaso = formulario.querySelector("[data-receta-paso]");
+    const listaPasos = formulario.querySelector("[data-lista-pasos-libres]");
+
+    formulario.querySelector("[data-agregar-ingrediente-libre]")?.addEventListener("click", () => {
+        const nombre = nombreIngrediente?.value.trim() || "";
+        const cantidad = cantidadIngrediente?.value || "";
+        const unidad = unidadIngrediente?.value.trim() || "UNIDAD";
+        if (!nombre || !cantidad || !listaIngredientes) return;
+        const fila = document.createElement("div");
+        fila.className = "item-constructor";
+        fila.innerHTML = `
+            <span>${escaparHtml(nombre)} - ${escaparHtml(cantidad)} ${escaparHtml(unidad)}</span>
+            <input type="hidden" name="ingrediente_nombre" value="${escaparHtml(nombre)}">
+            <input type="hidden" name="ingrediente_cantidad" value="${escaparHtml(cantidad)}">
+            <input type="hidden" name="ingrediente_unidad" value="${escaparHtml(unidad)}">
+            <button type="button" data-remover-elemento>x</button>`;
+        listaIngredientes.appendChild(fila);
+        nombreIngrediente.value = "";
+        cantidadIngrediente.value = "";
+        unidadIngrediente.value = "";
+        nombreIngrediente.focus();
+    });
+
+    formulario.querySelector("[data-agregar-paso-libre]")?.addEventListener("click", () => {
+        const paso = textoPaso?.value.trim() || "";
+        if (!paso || !listaPasos) return;
+        const fila = document.createElement("div");
+        fila.className = "item-constructor";
+        fila.innerHTML = `
+            <span>${escaparHtml(paso)}</span>
+            <input type="hidden" name="pasos_receta" value="${escaparHtml(paso)}">
+            <button type="button" data-remover-elemento>x</button>`;
+        listaPasos.appendChild(fila);
+        textoPaso.value = "";
+        textoPaso.focus();
+    });
+
+    formulario.addEventListener("click", (evento) => {
+        if (evento.target.matches("[data-remover-elemento]")) {
+            evento.target.closest(".item-constructor")?.remove();
+        }
+    });
 });
 
 function cerrarRecetas() {

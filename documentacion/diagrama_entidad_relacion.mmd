@@ -1,0 +1,150 @@
+erDiagram
+    USUARIO ||--o| CLIENTE : "credenciales cliente"
+    USUARIO ||--o| GERENTE : "credenciales gerente"
+    CLIENTE ||--o{ PAQUETE : "menus personalizados"
+    CLIENTE ||--o{ PROYECTO_EVENTO : "contrata"
+    GERENTE ||--o{ SOLICITUD_SERVICIO : "atiende"
+    GERENTE ||--o{ PROYECTO_EVENTO : "administra"
+    PLATILLO ||--o{ PLATILLO_INGREDIENTE : "usa"
+    INGREDIENTE ||--o{ PLATILLO_INGREDIENTE : "integra"
+    PLATILLO ||--o{ INSTRUCCION : "se prepara con"
+    PLATILLO ||--o| PUBLICACION_RECETA : "se publica como"
+    PAQUETE ||--o{ PAQUETE_PLATILLO : "incluye"
+    PLATILLO ||--o{ PAQUETE_PLATILLO : "forma parte de"
+    PAQUETE ||--o{ PAQUETE_COMPLEMENTO : "incluye"
+    COMPLEMENTO ||--o{ PAQUETE_COMPLEMENTO : "forma parte de"
+    SALON ||--o{ SOLICITUD_SERVICIO : "preferido en"
+    PAQUETE ||--o{ SOLICITUD_SERVICIO : "preferido en"
+    SOLICITUD_SERVICIO ||--o| PROYECTO_EVENTO : "se convierte en"
+    SALON ||--o{ PROYECTO_EVENTO : "recibe"
+    PAQUETE ||--o{ PROYECTO_EVENTO : "se contrata en"
+    PROYECTO_EVENTO ||--o{ PROYECTO_COMPLEMENTO : "agrega extras"
+    COMPLEMENTO ||--o{ PROYECTO_COMPLEMENTO : "extra contratado"
+    PROYECTO_EVENTO ||--o{ PAGO : "recibe"
+    PROYECTO_EVENTO ||--o{ INVITADO_EVENTO : "gestiona invitados"
+    PROYECTO_EVENTO ||--o{ CORTESIA_EVENTO : "ofrece cortesia"
+    PROYECTO_EVENTO ||--o{ NOTIFICACION : "genera"
+    SALON ||--o{ NOTIFICACION : "recibe aviso instalacion"
+
+    USUARIO {
+        NUMBER id_usuario PK
+        VARCHAR2 nombre_usuario UK
+        VARCHAR2 rol
+        CHAR activo
+    }
+    CLIENTE {
+        NUMBER id_cliente PK
+        NUMBER id_usuario FK
+        VARCHAR2 nombre
+        VARCHAR2 apellido
+        VARCHAR2 correo UK
+    }
+    GERENTE {
+        NUMBER id_gerente PK
+        NUMBER id_usuario FK
+        VARCHAR2 nombre
+        VARCHAR2 estatus
+    }
+    PLATILLO {
+        NUMBER id_platillo PK
+        VARCHAR2 nombre UK
+        NUMBER precio
+        NUMBER costo_estimado
+        NUMBER porciones_base
+    }
+    INGREDIENTE {
+        NUMBER id_ingrediente PK
+        VARCHAR2 nombre_ingrediente UK
+        VARCHAR2 unidad_medida
+    }
+    PLATILLO_INGREDIENTE {
+        NUMBER folio_pi PK
+        NUMBER id_platillo FK
+        NUMBER id_ingrediente FK
+        NUMBER cantidad
+    }
+    INSTRUCCION {
+        NUMBER id_instruccion PK
+        NUMBER id_platillo FK
+        NUMBER numero_paso
+    }
+    PUBLICACION_RECETA {
+        NUMBER id_publicacion PK
+        NUMBER id_platillo FK
+        VARCHAR2 titulo_publico
+        VARCHAR2 estatus
+        CHAR destacado
+    }
+    COMPLEMENTO {
+        NUMBER id_complemento PK
+        VARCHAR2 nombre UK
+        NUMBER precio
+        VARCHAR2 tipo_cobro
+    }
+    SALON {
+        NUMBER id_salon PK
+        VARCHAR2 nombre UK
+        NUMBER costo_renta
+        NUMBER capacidad_maxima
+    }
+    PAQUETE {
+        NUMBER id_paquete PK
+        VARCHAR2 nombre
+        NUMBER precio_base
+        CHAR visible_publico
+        CHAR personalizado
+        NUMBER id_cliente FK
+    }
+    PAQUETE_PLATILLO {
+        NUMBER id_paquete_platillo PK
+        NUMBER id_paquete FK
+        NUMBER id_platillo FK
+    }
+    PAQUETE_COMPLEMENTO {
+        NUMBER id_paquete_complemento PK
+        NUMBER id_paquete FK
+        NUMBER id_complemento FK
+    }
+    SOLICITUD_SERVICIO {
+        NUMBER id_solicitud PK
+        NUMBER id_salon_preferido FK
+        NUMBER id_paquete_preferido FK
+        VARCHAR2 estatus
+    }
+    PROYECTO_EVENTO {
+        NUMBER id_proyecto PK
+        NUMBER id_solicitud FK
+        NUMBER id_cliente FK
+        NUMBER id_gerente FK
+        NUMBER id_salon FK
+        NUMBER id_paquete FK
+        NUMBER numero_invitados
+        NUMBER total_estimado
+    }
+    PROYECTO_COMPLEMENTO {
+        NUMBER id_proyecto_complemento PK
+        NUMBER id_proyecto FK
+        NUMBER id_complemento FK
+    }
+    PAGO {
+        NUMBER id_pago PK
+        NUMBER id_proyecto FK
+        NUMBER monto
+        VARCHAR2 tipo_pago
+    }
+    INVITADO_EVENTO {
+        NUMBER id_invitado PK
+        NUMBER id_proyecto FK
+        VARCHAR2 estatus_confirmacion
+    }
+    CORTESIA_EVENTO {
+        NUMBER id_cortesia PK
+        NUMBER id_proyecto FK
+        VARCHAR2 tipo_cortesia
+    }
+    NOTIFICACION {
+        NUMBER id_notificacion PK
+        NUMBER id_proyecto FK
+        NUMBER id_salon FK
+        VARCHAR2 tipo_destinatario
+    }

@@ -32,18 +32,18 @@ INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 11, 'Paola', 'Vega', 'paola.vega
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 12, 'Ricardo', 'Leon', 'ricardo.leon@example.com', '555-200-0009', 'Calle Mar 88', SYSDATE);
 INSERT INTO CLIENTE VALUES (sq_cliente.NEXTVAL, 13, 'Elena', 'Campos', 'elena.campos@example.com', '555-200-0010', 'Av. Jardin 42', SYSDATE);
 
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 82.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 61.00, 4, 'FUERTE', 'VEGETARIANO', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 138.00, 6, 'FUERTE', 'PREMIUM', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 79.00, 4, 'FUERTE', 'LIGERO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 65.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ASADO DE BODA ZACATECANO', 'Guiso tradicional de cerdo con chile rojo y especias', 210.00, 92.00, 6, 'FUERTE', 'REGIONAL', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'LOMO EN SALSA DE VINO TINTO', 'Lomo de cerdo glaseado con salsa de vino y hierbas', 235.00, 105.00, 6, 'FUERTE', 'FORMAL', 'ALTA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CANAPES DE QUESO Y MEMBRILLO', 'Bocados frios para recepcion con queso regional y membrillo', 95.00, 36.00, 12, 'ENTRADA', 'REGIONAL', 'BAJA', 'img/hero-banquetes.png', 'S');
-INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'MOUSSE DE CHOCOLATE', 'Postre individual con chocolate semiamargo y crema batida', 80.00, 31.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/hero-banquetes.png', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'BROCHETA DE RES', 'Brochetas de res con vegetales asados', 185.00, 82.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/platillos/brocheta-res.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CHILES RELLENOS DE QUESO', 'Chiles poblanos rellenos con salsa de tomate', 145.00, 61.00, 4, 'FUERTE', 'VEGETARIANO', 'ALTA', 'img/platillos/chiles-rellenos-queso.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'FILETE MIGNON CON CHAMPINONES', 'Filete de res con salsa de champinones', 260.00, 138.00, 6, 'FUERTE', 'PREMIUM', 'ALTA', 'img/platillos/filete-mignon-champinones.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PESCADO AL VAPOR', 'Pescado blanco con verduras y salsa ligera', 175.00, 79.00, 4, 'FUERTE', 'LIGERO', 'MEDIA', 'img/platillos/pescado-vapor.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'POLLO A LA CERVEZA', 'Pollo en salsa de cerveza y especias', 155.00, 65.00, 4, 'FUERTE', 'CLASICO', 'MEDIA', 'img/platillos/pollo-cerveza.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CREMA DE ELOTE', 'Entrada cremosa con elote dulce', 75.00, 28.00, 8, 'ENTRADA', 'VEGETARIANO', 'BAJA', 'img/platillos/crema-elote.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ENSALADA MEDITERRANEA', 'Ensalada fresca con queso y aceitunas', 90.00, 34.00, 6, 'ENTRADA', 'LIGERO', 'BAJA', 'img/platillos/ensalada-mediterranea.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'PASTEL TRES LECHES', 'Postre clasico para eventos sociales', 65.00, 24.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/platillos/pastel-tres-leches.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'ASADO DE BODA ZACATECANO', 'Guiso tradicional de cerdo con chile rojo y especias', 210.00, 92.00, 6, 'FUERTE', 'REGIONAL', 'ALTA', 'img/platillos/asado-boda-zacatecano.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'LOMO EN SALSA DE VINO TINTO', 'Lomo de cerdo glaseado con salsa de vino y hierbas', 235.00, 105.00, 6, 'FUERTE', 'FORMAL', 'ALTA', 'img/platillos/lomo-vino-tinto.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'CANAPES DE QUESO Y MEMBRILLO', 'Bocados frios para recepcion con queso regional y membrillo', 95.00, 36.00, 12, 'ENTRADA', 'REGIONAL', 'BAJA', 'img/platillos/canapes-queso-membrillo.jpg', 'S');
+INSERT INTO PLATILLO VALUES (sq_platillo.NEXTVAL, 'MOUSSE DE CHOCOLATE', 'Postre individual con chocolate semiamargo y crema batida', 80.00, 31.00, 10, 'POSTRE', 'CLASICO', 'MEDIA', 'img/platillos/mousse-chocolate.jpg', 'S');
 
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'FILETE DE RES', 'GRAMOS', 'GRANEL', 'Corte fresco');
 INSERT INTO INGREDIENTE VALUES (sq_ingrediente.NEXTVAL, 'CHILE MORRON', 'PIEZAS', 'PIEZA', 'Rojo o verde');
@@ -148,6 +148,15 @@ INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 10, 2, 'Hornear con rome
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 11, 1, 'Cortar baguette, montar queso de cabra y membrillo.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 1, 'Fundir chocolate y mezclar con crema batida.', NULL);
 INSERT INTO INSTRUCCION VALUES (sq_instruccion.NEXTVAL, 12, 2, 'Refrigerar en porciones individuales.', NULL);
+
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 1, 'Brochetas De Res Para Compartir', 'Una receta practica para reuniones familiares, con piezas pequenas para servir al centro de la mesa.', 'PUBLICADA', 'N', SYSDATE - 12, SYSDATE - 12);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 2, 'Chiles Rellenos De Queso', 'Catherine prepara esta receta cuando quiere algo casero, rendidor y con sabor tradicional.', 'PUBLICADA', 'S', SYSDATE - 11, SYSDATE - 11);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 5, 'Pollo A La Cerveza', 'Una receta de domingo: sencilla, aromatica y perfecta para acompanar con arroz o verduras.', 'PUBLICADA', 'S', SYSDATE - 10, SYSDATE - 10);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 6, 'Crema De Elote Suave', 'Entrada cremosa para dias tranquilos, facil de servir en tazas pequenas o plato hondo.', 'PUBLICADA', 'N', SYSDATE - 9, SYSDATE - 9);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 8, 'Pastel Tres Leches Familiar', 'El postre que siempre piden en casa: humedo, dulce y listo para celebraciones pequenas.', 'PUBLICADA', 'S', SYSDATE - 8, SYSDATE - 8);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 9, 'Asado De Boda Zacatecano', 'Receta regional con chile rojo y especias, pensada para documentar el sazon que Catherine comparte con su familia.', 'PUBLICADA', 'N', SYSDATE - 7, SYSDATE - 7);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 11, 'Canapes De Queso Y Membrillo', 'Bocados pequenos para visitas inesperadas, con contraste dulce y salado.', 'PUBLICADA', 'N', SYSDATE - 6, SYSDATE - 6);
+INSERT INTO PUBLICACION_RECETA VALUES (sq_publicacion_receta.NEXTVAL, 12, 'Mousse De Chocolate', 'Postre frio para preparar con anticipacion y servir en vasitos individuales.', 'BORRADOR', 'N', SYSDATE - 5, SYSDATE - 5);
 
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'BARRA DE BEBIDAS', 'Aguas frescas y refrescos por persona', 55.00, 'BEBIDA', 'POR_PERSONA', 'S');
 INSERT INTO COMPLEMENTO VALUES (sq_complemento.NEXTVAL, 'MESA DE POSTRES', 'Variedad de postres individuales', 85.00, 'POSTRE', 'POR_PERSONA', 'S');

@@ -1,8 +1,30 @@
-# Banquetes Catherine
+# Catherine: Banquetes Y Recetario
 
-Proyecto final de Sistemas de Base de Datos II. Sistema web con Oracle Database para administrar solicitudes, clientes, proyectos de eventos, paquetes, pagos, salones, reportes y notificaciones.
+Proyecto final de Sistemas de Base de Datos II. Sistema web con Oracle Database dividido en dos experiencias sobre una misma base: Banquetes Catherine y Recetario de Catherine.
+
+Autores:
+
+- Angel Janvier Gonzalez Delgado
+- Carlos Alberto Gutierrez Flores
 
 Incluye una consola auxiliar de demostracion que registra las sentencias SQL/PLSQL ejecutadas por el sitio y muestra una tabla con las primeras filas consultadas.
+
+Al entrar a `/` aparece un portal con dos botones:
+
+- `Banquetes Catherine`: eventos, salones, paquetes, clientes, pagos y reportes.
+- `Recetario de Catherine`: blog de recetas con vista publica y vista Catherine para cargar recetas.
+
+Documentacion dividida:
+
+- `documentacion/banquetes.md`
+- `documentacion/recetario.md`
+- `documentacion/diagrama_entidad_relacion.md`
+- `documentacion/diagrama_entidad_relacion.mmd`
+- `documentacion/diagrama_entidad_relacion.html`
+- `documentacion/diagrama_entidad_relacion_recetario.md`
+- `documentacion/diagrama_entidad_relacion_recetario.mmd`
+- `documentacion/diagrama_entidad_relacion_recetario.html`
+- `documentacion/atribuciones_imagenes_platillos.md`
 
 ## Tecnologias
 
@@ -51,6 +73,12 @@ Para terminar:
 ```bat
 detener.bat
 ```
+
+Rutas principales:
+
+- `http://127.0.0.1:PUERTO/`: portal inicial.
+- `http://127.0.0.1:PUERTO/banquetes`: sitio de banquetes.
+- `http://127.0.0.1:PUERTO/recetario`: blog/recetario.
 
 ## Consultas Manuales En VS Code
 
@@ -199,25 +227,25 @@ Reemplaza `PUERTO` por el valor de `.estado\puerto.txt`.
 Esa vista muestra las consultas SQL, procedimientos PL/SQL, parametros seguros, filas devueltas, muestra de resultados en tabla, errores y commits/rollbacks que genera el sitio.
 
 1. Ver inicio sin cargar catalogos.
-2. Abrir catalogos publicos separados: platillos, complementos y salones.
-3. Crear una solicitud desde el modal Agendar.
-4. Entrar como gerente.
-5. Modificar una solicitud propuesta por cliente.
-6. Convertir solicitud en proyecto con anticipo.
-7. Intentar convertir una solicitud con salon sin capacidad.
-8. Registrar pago y revisar saldo pendiente.
-9. Liquidar un evento y ver `finiquitado = S`.
-10. Entrar como cliente.
-11. Ver solicitudes, costos, ubicacion y paquetes visibles.
-12. Cambiar invitados en un evento permitido.
-13. Intentar cambiar invitados en evento con menos de 5 dias.
-14. Simular envio de invitacion y confirmar invitado.
-15. Entrar como chef y administrar recetas, ingredientes, dificultad y costos.
-16. Revisar reporte de ingredientes.
-17. Revisar cobranza 21 dias antes.
-18. Revisar platillos populares y menos demandados.
-19. Revisar historial del cliente.
-20. Revisar notificaciones generadas.
+2. Elegir Banquetes Catherine o Recetario de Catherine desde el portal.
+3. Abrir el recetario, cambiar entre vista publica y vista Catherine, y guardar una receta.
+4. Abrir catalogos publicos separados: platillos, complementos y salones.
+5. Crear una solicitud desde el modal Agendar.
+6. Entrar como gerente.
+7. Modificar una solicitud propuesta por cliente.
+8. Convertir solicitud en proyecto con anticipo.
+9. Intentar convertir una solicitud con salon sin capacidad.
+10. Registrar pago y revisar saldo pendiente.
+11. Liquidar un evento y ver `finiquitado = S`.
+12. Entrar como cliente.
+13. Ver solicitudes, costos, ubicacion y paquetes visibles.
+14. Cambiar invitados en un evento permitido.
+15. Intentar cambiar invitados en evento con menos de 5 dias.
+16. Simular envio de invitacion y confirmar invitado.
+17. Entrar como chef y administrar recetas, ingredientes, dificultad y costos.
+18. Revisar reporte de ingredientes.
+19. Revisar cobranza 21 dias antes.
+20. Revisar platillos populares, recetario publico, historial del cliente y notificaciones.
 
 ## Temas Del Semestre Cubiertos
 

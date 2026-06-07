@@ -1,4 +1,5 @@
 -- Consultas listas para exposicion en SQL Developer.
+-- Autores: Angel Janvier Gonzalez Delgado y Carlos Alberto Gutierrez Flores.
 -- Conexion recomendada:
 -- Usuario: BANQUETES_CATHERINE
 -- Password: Catherine2026
@@ -138,3 +139,29 @@ SELECT
     COUNT(*) AS platillos_fuera_de_regla
 FROM platillo
 WHERE porciones_base <> 1;
+
+-- 15. Recetario publico: publicaciones con conteo de ingredientes y pasos.
+SELECT
+    titulo_publico,
+    categoria,
+    dificultad,
+    destacado,
+    numero_ingredientes,
+    numero_pasos
+FROM vw_recetario_publico
+ORDER BY destacado DESC, titulo_publico;
+
+-- 16. Receta compartida: publicacion, platillo base, ingredientes e instrucciones.
+SELECT
+    r.titulo_publico,
+    i.nombre_ingrediente,
+    pi.cantidad,
+    i.unidad_medida,
+    inst.numero_paso,
+    inst.instruccion
+FROM vw_recetario_publico r
+INNER JOIN platillo_ingrediente pi ON pi.id_platillo = r.id_platillo
+INNER JOIN ingrediente i ON i.id_ingrediente = pi.id_ingrediente
+LEFT JOIN instruccion inst ON inst.id_platillo = r.id_platillo
+WHERE r.destacado = 'S'
+ORDER BY r.titulo_publico, i.nombre_ingrediente, inst.numero_paso;

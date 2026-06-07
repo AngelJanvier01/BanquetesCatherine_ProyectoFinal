@@ -22,6 +22,21 @@ app = Flask(
 )
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "banquetes-catherine-demo")
 
+FOTOS_PLATILLOS_RECETARIO = {
+    "BROCHETA DE RES": "img/platillos/brocheta-res.jpg",
+    "CHILES RELLENOS DE QUESO": "img/platillos/chiles-rellenos-queso.jpg",
+    "FILETE MIGNON CON CHAMPINONES": "img/platillos/filete-mignon-champinones.jpg",
+    "PESCADO AL VAPOR": "img/platillos/pescado-vapor.jpg",
+    "POLLO A LA CERVEZA": "img/platillos/pollo-cerveza.jpg",
+    "CREMA DE ELOTE": "img/platillos/crema-elote.jpg",
+    "ENSALADA MEDITERRANEA": "img/platillos/ensalada-mediterranea.jpg",
+    "PASTEL TRES LECHES": "img/platillos/pastel-tres-leches.jpg",
+    "ASADO DE BODA ZACATECANO": "img/platillos/asado-boda-zacatecano.jpg",
+    "LOMO EN SALSA DE VINO TINTO": "img/platillos/lomo-vino-tinto.jpg",
+    "CANAPES DE QUESO Y MEMBRILLO": "img/platillos/canapes-queso-membrillo.jpg",
+    "MOUSSE DE CHOCOLATE": "img/platillos/mousse-chocolate.jpg",
+}
+
 
 def separar_nombre_apellido(nombre_completo):
     partes = [parte for parte in nombre_completo.strip().split() if parte]
@@ -44,6 +59,160 @@ def numero_desde_var(variable):
     if isinstance(valor, list):
         valor = valor[0]
     return int(valor)
+
+
+def valor_entero(valor, predeterminado=1):
+    try:
+        numero = int(valor)
+        return numero if numero > 0 else predeterminado
+    except (TypeError, ValueError):
+        return predeterminado
+
+
+def texto_mayusculas(valor, predeterminado="GENERAL"):
+    texto = " ".join((valor or predeterminado).strip().split())
+    return texto.upper() if texto else predeterminado
+
+
+def aplicar_foto_platillo_recetario(receta):
+    foto_actual = (receta.get("foto_url") or "").strip()
+    if foto_actual and foto_actual != "img/hero-banquetes.png":
+        return receta
+    foto_recetario = FOTOS_PLATILLOS_RECETARIO.get(texto_mayusculas(receta.get("nombre"), ""))
+    if foto_recetario:
+        receta["foto_url"] = foto_recetario
+    return receta
+
+
+def obtener_o_crear_ingrediente(cursor, nombre, unidad_medida):
+    nombre_normalizado = texto_mayusculas(nombre, "")
+    unidad_normalizada = texto_mayusculas(unidad_medida, "UNIDAD")
+    if not nombre_normalizado:
+        raise ValueError("Cada ingrediente debe tener nombre.")
+
+    cursor.execute(
+        """
+        SELECT id_ingrediente
+        FROM INGREDIENTE
+        WHERE UPPER(nombre_ingrediente) = :nombre
+        """,
+        {"nombre": nombre_normalizado},
+    )
+    fila = cursor.fetchone()
+    if fila:
+        return int(fila[0])
+
+    sql = """
+        INSERT INTO INGREDIENTE (
+            id_ingrediente, nombre_ingrediente, unidad_medida, presentacion, observacion
+        ) VALUES (
+            sq_ingrediente.NEXTVAL, :nombre, :unidad_medida, 'Capturado en recetario', 'Alta libre de Catherine'
+        )
+        RETURNING id_ingrediente INTO :id_ingrediente
+    """
+    id_ingrediente = cursor.var(oracledb.NUMBER)
+    parametros = {
+        "nombre": nombre_normalizado,
+        "unidad_medida": unidad_normalizada,
+        "id_ingrediente": id_ingrediente,
+    }
+    cursor.execute(sql, parametros)
+    nuevo_id = numero_desde_var(id_ingrediente)
+    registrar_evento_sql(
+        "Recetario: crear ingrediente libre",
+        sql,
+        {**parametros, "id_ingrediente": "OUT"},
+        filas=1,
+        resultado=f"Ingrediente {nuevo_id} creado",
+        tipo="TRANSACCION",
+    )
+    return nuevo_id
+
+
+def cargar_recetario_catherine():
+    datos = {
+        "recetas": [],
+        "publicas": [],
+        "ingredientes": [],
+        "pasos": [],
+        "categorias": [],
+        "error_bd": None,
+    }
+    try:
+        datos["recetas"] = consultar(
+            """
+            SELECT *
+            FROM vw_recetario_catherine
+            ORDER BY destacado DESC, fecha_publicacion DESC, nombre
+            """,
+            accion="Recetario: publicaciones Catherine",
+        )
+    except Exception as error:
+        datos["error_bd"] = str(error)
+        datos["recetas"] = consultar(
+            """
+            SELECT
+                id_platillo AS id_publicacion,
+                id_platillo,
+                nombre,
+                nombre AS titulo_publico,
+                descripcion,
+                'Receta compartida desde el catalogo de Banquetes Catherine.' AS historia,
+                categoria,
+                tipo_dieta,
+                dificultad,
+                foto_url,
+                porciones_base,
+                'PUBLICADA' AS estatus,
+                'N' AS destacado,
+                SYSDATE AS fecha_publicacion,
+                numero_ingredientes,
+                0 AS numero_pasos
+            FROM vw_platillos_publicos
+            ORDER BY categoria, nombre
+            """,
+            accion="Recetario: respaldo desde catalogo",
+        )
+
+    datos["recetas"] = [aplicar_foto_platillo_recetario(receta) for receta in datos["recetas"]]
+    datos["publicas"] = [
+        receta for receta in datos["recetas"]
+        if receta.get("estatus") == "PUBLICADA"
+    ]
+    ids = [receta["id_platillo"] for receta in datos["recetas"]]
+    if ids:
+        datos["ingredientes"] = consultar(
+            """
+            SELECT pi.id_platillo, i.nombre_ingrediente, i.unidad_medida, pi.cantidad
+            FROM PLATILLO_INGREDIENTE pi
+            INNER JOIN INGREDIENTE i ON i.id_ingrediente = pi.id_ingrediente
+            WHERE pi.id_platillo IN (
+                SELECT id_platillo
+                FROM PLATILLO
+                WHERE activo = 'S'
+            )
+            ORDER BY i.nombre_ingrediente
+            """,
+            accion="Recetario: ingredientes por receta",
+        )
+        datos["pasos"] = consultar(
+            """
+            SELECT id_platillo, numero_paso, instruccion, detalle_instruccion
+            FROM INSTRUCCION
+            WHERE id_platillo IN (
+                SELECT id_platillo
+                FROM PLATILLO
+                WHERE activo = 'S'
+            )
+            ORDER BY id_platillo, numero_paso
+            """,
+            accion="Recetario: pasos por receta",
+        )
+    datos["categorias"] = sorted({
+        receta.get("categoria") for receta in datos["publicas"]
+        if receta.get("categoria")
+    })
+    return datos
 
 
 def cargar_opciones_solicitud():
@@ -82,8 +251,174 @@ def cargar_opciones_solicitud():
 
 
 @app.route("/")
+def portal():
+    return render_template("portal.html")
+
+
+@app.get("/banquetes")
 def inicio():
     return render_template("inicio.html")
+
+
+@app.get("/recetario")
+def recetario():
+    datos = cargar_recetario_catherine()
+    return render_template(
+        "recetario.html",
+        recetas=datos["recetas"],
+        publicas=datos["publicas"],
+        receta_ingredientes=datos["ingredientes"],
+        receta_pasos=datos["pasos"],
+        categorias=datos["categorias"],
+        error_bd=datos["error_bd"],
+        vista_inicial=request.args.get("vista", "publica"),
+    )
+
+
+@app.post("/recetario/recetas")
+def crear_receta_recetario():
+    sql_platillo = """
+        INSERT INTO PLATILLO (
+            id_platillo, nombre, descripcion, precio, costo_estimado,
+            porciones_base, categoria, tipo_dieta, dificultad, foto_url
+        ) VALUES (
+            sq_platillo.NEXTVAL, UPPER(TRIM(:nombre)), :descripcion, :precio,
+            :costo_estimado, :porciones_base, UPPER(TRIM(:categoria)),
+            UPPER(TRIM(:tipo_dieta)), UPPER(TRIM(:dificultad)), :foto_url
+        )
+        RETURNING id_platillo INTO :id_platillo
+    """
+    try:
+        nombres_ingrediente = request.form.getlist("ingrediente_nombre")
+        cantidades_ingrediente = request.form.getlist("ingrediente_cantidad")
+        unidades_ingrediente = request.form.getlist("ingrediente_unidad")
+        ingredientes = []
+        for indice, nombre in enumerate(nombres_ingrediente):
+            nombre = (nombre or "").strip()
+            if not nombre:
+                continue
+            cantidad = valor_float(cantidades_ingrediente[indice] if indice < len(cantidades_ingrediente) else 0, 0)
+            if cantidad <= 0:
+                raise ValueError("Cada ingrediente debe tener cantidad mayor a cero.")
+            unidad = unidades_ingrediente[indice] if indice < len(unidades_ingrediente) else "UNIDAD"
+            ingredientes.append({
+                "nombre": nombre,
+                "cantidad": cantidad,
+                "unidad": unidad,
+            })
+
+        pasos_receta = [paso.strip() for paso in request.form.getlist("pasos_receta") if paso.strip()]
+        if not ingredientes:
+            raise ValueError("Agrega al menos un ingrediente.")
+        if not pasos_receta:
+            raise ValueError("Agrega al menos un paso de preparacion.")
+
+        estatus = request.form.get("estatus") if request.form.get("estatus") in ("PUBLICADA", "BORRADOR") else "PUBLICADA"
+        destacado = "S" if request.form.get("destacado") == "S" else "N"
+        precio = valor_float(request.form.get("precio"), 0)
+        costo_estimado = valor_float(request.form.get("costo_estimado"), 0)
+
+        with abrir_conexion() as conexion:
+            with conexion.cursor() as cursor:
+                id_platillo = cursor.var(oracledb.NUMBER)
+                parametros_platillo = {
+                    "nombre": request.form["nombre"],
+                    "descripcion": request.form.get("descripcion"),
+                    "precio": precio,
+                    "costo_estimado": costo_estimado,
+                    "porciones_base": valor_entero(request.form.get("porciones_base"), 4),
+                    "categoria": request.form.get("categoria") or "CASERA",
+                    "tipo_dieta": request.form.get("tipo_dieta") or "GENERAL",
+                    "dificultad": request.form.get("dificultad") or "MEDIA",
+                    "foto_url": request.form.get("foto_url") or "img/hero-recetario.png",
+                    "id_platillo": id_platillo,
+                }
+                cursor.execute(sql_platillo, parametros_platillo)
+                nuevo_id = numero_desde_var(id_platillo)
+                registrar_evento_sql(
+                    "Recetario: crear receta libre",
+                    sql_platillo,
+                    {**parametros_platillo, "id_platillo": "OUT"},
+                    filas=1,
+                    resultado=f"Platillo/receta {nuevo_id} creado",
+                    tipo="TRANSACCION",
+                )
+
+                sql_relacion = """
+                    INSERT INTO PLATILLO_INGREDIENTE (folio_pi, id_platillo, id_ingrediente, cantidad)
+                    VALUES (sq_platillo_ingrediente.NEXTVAL, :id_platillo, :id_ingrediente, :cantidad)
+                """
+                ingredientes_insertados = set()
+                for ingrediente in ingredientes:
+                    id_ingrediente = obtener_o_crear_ingrediente(cursor, ingrediente["nombre"], ingrediente["unidad"])
+                    if id_ingrediente in ingredientes_insertados:
+                        continue
+                    parametros_relacion = {
+                        "id_platillo": nuevo_id,
+                        "id_ingrediente": id_ingrediente,
+                        "cantidad": ingrediente["cantidad"],
+                    }
+                    cursor.execute(sql_relacion, parametros_relacion)
+                    ingredientes_insertados.add(id_ingrediente)
+                    registrar_evento_sql(
+                        "Recetario: relacionar ingrediente",
+                        sql_relacion,
+                        parametros_relacion,
+                        filas=1,
+                        resultado="Ingrediente agregado a receta",
+                        tipo="TRANSACCION",
+                    )
+
+                sql_instruccion = """
+                    INSERT INTO INSTRUCCION (id_instruccion, id_platillo, numero_paso, instruccion, detalle_instruccion)
+                    VALUES (sq_instruccion.NEXTVAL, :id_platillo, :numero_paso, :instruccion, :detalle)
+                """
+                for numero_paso, paso in enumerate(pasos_receta, start=1):
+                    parametros_paso = {
+                        "id_platillo": nuevo_id,
+                        "numero_paso": numero_paso,
+                        "instruccion": paso,
+                        "detalle": None,
+                    }
+                    cursor.execute(sql_instruccion, parametros_paso)
+                    registrar_evento_sql(
+                        "Recetario: insertar paso",
+                        sql_instruccion,
+                        parametros_paso,
+                        filas=1,
+                        resultado="Paso agregado",
+                        tipo="TRANSACCION",
+                    )
+
+                sql_publicacion = """
+                    INSERT INTO PUBLICACION_RECETA (
+                        id_publicacion, id_platillo, titulo_publico, historia, estatus, destacado
+                    ) VALUES (
+                        sq_publicacion_receta.NEXTVAL, :id_platillo, :titulo_publico, :historia, :estatus, :destacado
+                    )
+                """
+                parametros_publicacion = {
+                    "id_platillo": nuevo_id,
+                    "titulo_publico": request.form.get("titulo_publico") or request.form["nombre"],
+                    "historia": request.form.get("historia"),
+                    "estatus": estatus,
+                    "destacado": destacado,
+                }
+                cursor.execute(sql_publicacion, parametros_publicacion)
+                conexion.commit()
+                registrar_evento_sql(
+                    "Recetario: publicar receta",
+                    sql_publicacion,
+                    parametros_publicacion,
+                    filas=1,
+                    resultado="Publicacion creada; COMMIT",
+                    tipo="TRANSACCION",
+                )
+        flash("Receta guardada en el recetario de Catherine.", "exito")
+    except Exception as error:
+        registrar_evento_sql("Recetario: alta libre", sql_platillo, resultado="Error; ROLLBACK", error=error, tipo="TRANSACCION")
+        flash(f"No se pudo guardar la receta: {error}", "error")
+    return redirect(url_for("recetario", vista="catherine"))
 
 
 @app.get("/platillos")
