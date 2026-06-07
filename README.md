@@ -25,6 +25,7 @@ Documentacion dividida:
 - `documentacion/diagrama_entidad_relacion_recetario.mmd`
 - `documentacion/diagrama_entidad_relacion_recetario.html`
 - `documentacion/atribuciones_imagenes_platillos.md`
+- `documentacion/capturas_sistema.md`
 
 ## Tecnologias
 
